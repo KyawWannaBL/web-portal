@@ -1,32 +1,10 @@
-import { DEFAULT_ROLE_PERMISSIONS, RoleCode, type PermissionCode } from "@britium/shared";
-
-export type RbacSnapshot = {
-  role: RoleCode | null;
-  permissions: PermissionCode[];
+export const ROLE_MATRIX: any = {
+  SYS: { level: 'L5', scope: 'S5', permissions: ['*'] },
+  MER: { level: 'L0', scope: 'S1', permissions: ['EXT-01'] },
+  CUR: { level: 'L1', scope: 'S1', permissions: ['PUP-01'] },
+  CUS: { level: 'L0', scope: 'S1', permissions: ['EXT-01'] }
 };
-
-function isRoleCode(value: unknown): value is RoleCode {
-  return typeof value === "string" && Object.values(RoleCode).includes(value as RoleCode);
-}
-
-export function normalizeRole(raw: unknown): RoleCode | null {
-  if (isRoleCode(raw)) return raw;
-  return null;
-}
-
-export function getEffectivePermissions(role: RoleCode | null): PermissionCode[] {
-  if (!role) return [];
-  return DEFAULT_ROLE_PERMISSIONS[role] ?? [];
-}
-
-export function hasAll(perms: PermissionCode[], required: PermissionCode[]): boolean {
-  if (required.length === 0) return true;
-  const s = new Set(perms);
-  return required.every((p) => s.has(p));
-}
-
-export function hasAny(perms: PermissionCode[], required: PermissionCode[]): boolean {
-  if (required.length === 0) return true;
-  const s = new Set(perms);
-  return required.some((p) => s.has(p));
-}
+export const checkPermission = (role: string, perm: string) => {
+  if (role === 'SYS') return true;
+  return ROLE_MATRIX[role]?.permissions.includes(perm) || false;
+};

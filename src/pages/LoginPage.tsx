@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
 import { useLanguageContext } from '@/lib/LanguageContext';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lock, Mail, ShieldCheck } from 'lucide-react';
 
 export default function LoginPage() {
-  const { login } = useAuth();
   const { t } = useLanguageContext();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -17,52 +15,59 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+    
     setLoading(true);
     try {
-      await login(email, password);
-      navigate('/');
-    } catch (err) {
-      alert(t('Login Failed', 'ဝင်ရောက်မှု မအောင်မြင်ပါ'));
-    } finally {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      
+      // Clear loading and move to dashboard
       setLoading(false);
+      navigate('/dashboard');
+    } catch (error: any) {
+      alert(t('Auth Error: ', 'အမှားအယွင်း: ') + error.message);
+      setLoading(false); // Critical: Re-enable buttons on failure
     }
   };
 
   return (
-    <div className=\"min-h-screen flex items-center justify-center bg-navy-950 p-4\">
-      <Card className=\"w-full max-w-md bg-white/5 border-white/10 backdrop-blur-xl\">
-        <CardContent className=\"pt-10 pb-10 space-y-8\">
-          <div className=\"text-center\">
-            <ShieldCheck className=\"h-16 w-16 text-gold-500 mx-auto mb-4\" />
-            <h1 className=\"text-2xl font-black text-white tracking-widest uppercase\">
-              {t('Identity Verification', 'အထောက်အထား အတည်ပြုခြင်း')}
-            </h1>
-          </div>
-          <form onSubmit={handleLogin} className=\"space-y-4\">
-            <div className=\"relative\">
-              <Mail className=\"absolute left-3 top-3 h-4 w-4 text-white/40\" />
-              <Input 
-                type=\"email\" 
-                placeholder={t('Identity (Email)', 'အီးမေးလ်')} 
-                className=\"bg-black/20 border-white/10 text-white pl-10 h-12\"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className=\"relative\">
-              <Lock className=\"absolute left-3 top-3 h-4 w-4 text-white/40\" />
-              <Input 
-                type=\"password\" 
-                placeholder={t('Security Key', 'လျှို့ဝှက်နံပါတ်')} 
-                className=\"bg-black/20 border-white/10 text-white pl-10 h-12\"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <Button type=\"submit\" disabled={loading} className=\"w-full h-12 bg-gold-500 hover:bg-gold-600 text-navy-950 font-bold\">
-              {loading ? t('Verifying...', 'စစ်ဆေးနေသည်...') : t('Initiate Session', 'စတင်ဝင်ရောက်မည်')}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 p-6">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <ShieldCheck className="h-16 w-16 text-emerald-500 mx-auto" />
+          <h2 className="mt-6 text-3xl font-extrabold text-white uppercase tracking-tighter">
+            Britium Express
+          </h2>
+          <p className="text-emerald-500/60 font-mono text-xs uppercase mt-2">v2026.02.25 Build</p>
+        </div>
+        <form className="mt-8 space-y-4" onSubmit={handleLogin}>
+          <Input 
+            type="email" 
+            placeholder={t('Email', 'အီးမေးလ်')} 
+            className="bg-white/5 border-white/10 text-white h-14"
+            onChange={(e) => setEmail(e.target.value)}
+            required 
+          />
+          <Input 
+            type="password" 
+            placeholder={t('Password', 'လျှို့ဝှက်နံပါတ်')} 
+            className="bg-white/5 border-white/10 text-white h-14"
+            onChange={(e) => setPassword(e.target.value)}
+            required 
+          />
+          <Button 
+            disabled={loading} 
+            className="w-full h-14 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-lg rounded-2xl transition-all active:scale-95"
+          >
+            {loading ? t('Verifying...', 'စစ်ဆေးနေသည်...') : t('Login', 'ဝင်ရောက်မည်')}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }
