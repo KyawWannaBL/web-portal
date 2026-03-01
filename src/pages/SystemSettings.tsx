@@ -1,471 +1,138 @@
 import React, { useState } from 'react';
-import { useLanguageContext } from '@/lib/LanguageContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/lib/supabase';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Settings as SettingsIcon, 
-  Save, 
-  RotateCcw, 
-  Clock, 
-  Percent, 
-  Phone, 
-  MapPin, 
-  Users, 
-  DollarSign,
-  Package,
-  Truck,
-  Bell
-} from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { Globe, Save, Loader2, FileSpreadsheet, Download, Upload, CheckCircle2 } from 'lucide-react';
 
-interface SystemSettings {
-  wayIdLength: number;
-  promotionCodeLength: number;
-  lastPickupHour: number;
-  lastDeliverHour: number;
-  returnCharges: number;
-  contactPhone: string;
-  maxStationDistance: number;
-  sameDayPlanHour: number;
-  autoAssignDeliveryman: boolean;
-  autoCreateCustomer: boolean;
-  autoAddRecipient: boolean;
-  allowCashAdvance: boolean;
-  allowDirectOrder: boolean;
-  allowDirectOrderAutoAssign: boolean;
-  allowDirectWayFill: boolean;
-  allowDirectWayFillAutoAssign: boolean;
-  remindRefund: boolean;
-}
-
-const defaultSettings: SystemSettings = {
-  wayIdLength: 6,
-  promotionCodeLength: 8,
-  lastPickupHour: 18,
-  lastDeliverHour: 20,
-  returnCharges: 15,
-  contactPhone: '+95 9 123 456 789',
-  maxStationDistance: 5000,
-  sameDayPlanHour: 14,
-  autoAssignDeliveryman: true,
-  autoCreateCustomer: true,
-  autoAddRecipient: true,
-  allowCashAdvance: false,
-  allowDirectOrder: true,
-  allowDirectOrderAutoAssign: false,
-  allowDirectWayFill: true,
-  allowDirectWayFillAutoAssign: false,
-  remindRefund: true
+const NATIONWIDE_LOCATIONS: Record<string, string[]> = {
+  "Yangon": ["Kamaryut", "Bahan", "Sanchaung", "Hlaing", "Insein", "Latha", "Mayangone", "Tamwe", "South Okkalapa", "North Okkalapa", "Mingaladon", "Thaketa", "Dawbon", "Pazundaung", "Botataung"],
+  "Mandalay": ["Chanayethazan", "Chanmyathazi", "Maha Aungmye", "Pyigyidagun", "Pyin Oo Lwin", "Amarapura", "Patheingyi", "Singu", "Thabeikkyin"],
+  "Nay Pyi Taw": ["Zabuthiri", "Dekkhinathiri", "Ottarathiri", "Pobbathiri", "Pyinmana", "Lewe", "Tatkon"],
+  "Shan (South)": ["Taunggyi", "Kalaw", "Nyaungshwe", "Hopong", "Hiseng", "Pinlaung", "Pekon"],
+  "Shan (North)": ["Lashio", "Hseni", "Kutkai", "Namtu", "Hsipaw", "Kyaukme", "Nawnghkio"],
+  "Shan (East)": ["Kengtung", "Mongla", "Mongyang", "Mongpawk"],
+  "Ayeyarwady": ["Pathein", "Hinthada", "Myaungmya", "Maubin", "Pyapon", "Labutta", "Bogale"],
+  "Bago": ["Bago", "Pyay", "Taungoo", "Tharyarwady", "Nyaunglebin", "Kawa"],
+  "Magway": ["Magway", "Pakokku", "Minbu", "Thayet", "Gangaw", "Chauk"],
+  "Sagaing": ["Sagaing", "Monywa", "Shwebo", "Katha", "Kale", "Tammu", "Hkamti"],
+  "Mon": ["Mawlamyine", "Thaton", "Mudon", "Ye", "Kyaikto", "Chaungzon"],
+  "Kayin": ["Hpa-An", "Myawaddy", "Kawkareik", "Hpapun", "Thandaunggyi"],
+  "Kachin": ["Myitkyina", "Bhamo", "Putao", "Mogaung", "Mohnyin", "Waingmaw"],
+  "Rakhine": ["Sittwe", "Thandwe", "Mrauk-U", "Kyaukpyu", "Maungdaw", "Ann"],
+  "Kayah": ["Loikaw", "Demoso", "Hpruso", "Bawlake"],
+  "Chin": ["Hakha", "Falam", "Mindat", "Kanpetlet", "Matupi", "Tedim"]
 };
 
 export default function SystemSettings() {
-  const { t } = useLanguageContext();
-  const [settings, setSettings] = useState<SystemSettings>(defaultSettings);
-  const [activeTab, setActiveTab] = useState('general');
+  const [isSaving, setIsSaving] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState("Yangon");
+  const [rates, setRates] = useState<Record<string, number>>({});
+  
+  const MAPBOX_TOKEN = "pk.eyJ1IjoiYnJpdGl1bXZlbnR1cmVzIiwiYSI6ImNtbHVydDRwbTAwZjczZnMxbDgyODJxbHUifQ.HwgFGIQzepHOhImZLM4Knw";
 
-  const handleSave = () => {
-    // Here you would typically save to backend
-    toast({
-      title: "Settings Saved",
-      description: "System settings have been updated successfully.",
-    });
+  const handleExport = () => {
+    const header = "Region,Township,Rate_MMK\n";
+    const rows = Object.entries(NATIONWIDE_LOCATIONS).flatMap(([region, townships]) => 
+      townships.map(t => `${region},${t},0`)
+    ).join("\n");
+    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Britium_Tariff_Template.csv`;
+    a.click();
   };
 
-  const handleReset = () => {
-    setSettings(defaultSettings);
-    toast({
-      title: "Settings Reset",
-      description: "All settings have been reset to default values.",
-    });
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsSaving(true);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const text = e.target?.result as string;
+      const lines = text.split('\n').slice(1); // Skip header
+      const updates = lines
+        .filter(line => line.trim())
+        .map(line => {
+          const [region, township, rate] = line.split(',');
+          return { region_name: region.trim(), zone_label: township.trim(), base_rate: Number(rate.trim()) };
+        });
+
+      const { error } = await supabase.from('domestic_tariffs').upsert(updates, { onConflict: 'region_name,zone_label' });
+      if (error) alert("Import Error: " + error.message);
+      else alert(`Bulk Sync Complete: ${updates.length} townships updated.`);
+      setIsSaving(false);
+    };
+    reader.readAsText(file);
   };
 
-  const updateSetting = (key: keyof SystemSettings, value: any) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+  const handleSave = async () => {
+    setIsSaving(true);
+    const updates = Object.entries(rates).map(([township, rate]) => ({
+      region_name: selectedRegion, zone_label: township, base_rate: rate
+    }));
+    const { error } = await supabase.from('domestic_tariffs').upsert(updates, { onConflict: 'region_name,zone_label' });
+    if (error) alert(error.message);
+    else alert(`${selectedRegion} tariffs updated.`);
+    setIsSaving(false);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-10 space-y-8 bg-[#0B101B] min-h-screen text-slate-300">
+      <div className="flex justify-between items-center bg-[#05080F] p-10 rounded-[3rem] border border-white/5 shadow-2xl">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('nav.settings')}</h1>
-          <p className="text-muted-foreground">
-            {t('settings.systemSettings')} - Configure system behavior and preferences
-          </p>
+          <h1 className="text-4xl font-black uppercase tracking-tighter text-white">Tariff Production Control</h1>
+          <p className="text-emerald-500 font-mono text-[10px] uppercase tracking-widest mt-2">MAPBOX_ID: {MAPBOX_TOKEN.substring(0, 12)}...</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleReset}>
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Reset to Default
+        <div className="flex gap-4">
+          <Button onClick={handleExport} variant="outline" className="border-white/10 text-white h-14 px-6 rounded-2xl font-black">
+            <Download className="mr-2 h-5 w-5" /> Export Template
           </Button>
-          <Button onClick={handleSave}>
-            <Save className="w-4 h-4 mr-2" />
-            {t('form.save')}
+          <div className="relative">
+            <input type="file" accept=".csv" onChange={handleImport} className="absolute inset-0 opacity-0 cursor-pointer" />
+            <Button variant="outline" className="border-emerald-500/30 text-emerald-500 h-14 px-6 rounded-2xl font-black bg-emerald-500/5">
+              <Upload className="mr-2 h-5 w-5" /> Import CSV
+            </Button>
+          </div>
+          <Button onClick={handleSave} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-500 text-white font-black h-14 px-10 rounded-2xl shadow-lg shadow-emerald-900/20">
+            {isSaving ? <Loader2 className="animate-spin" /> : <><Save className="mr-2 h-5 w-5" /> Save Region</>}
           </Button>
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="general" className="flex items-center gap-2">
-            <SettingsIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">General</span>
-          </TabsTrigger>
-          <TabsTrigger value="operations" className="flex items-center gap-2">
-            <Truck className="w-4 h-4" />
-            <span className="hidden sm:inline">Operations</span>
-          </TabsTrigger>
-          <TabsTrigger value="automation" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            <span className="hidden sm:inline">Automation</span>
-          </TabsTrigger>
-          <TabsTrigger value="merchant" className="flex items-center gap-2">
-            <Package className="w-4 h-4" />
-            <span className="hidden sm:inline">Merchant</span>
-          </TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-12 gap-8">
+        <Card className="col-span-3 rounded-[3rem] border-none bg-[#05080F] ring-1 ring-white/5 max-h-[70vh] overflow-y-auto scrollbar-hide">
+          <CardHeader className="p-8 border-b border-white/5"><CardTitle className="text-white font-black text-xl flex items-center gap-3"><Globe className="text-emerald-500" /> States & Regions</CardTitle></CardHeader>
+          <CardContent className="p-6 space-y-1">
+            {Object.keys(NATIONWIDE_LOCATIONS).map((reg) => (
+              <button key={reg} onClick={() => setSelectedRegion(reg)} className={`w-full text-left p-4 rounded-xl font-bold transition-all text-sm ${selectedRegion === reg ? 'bg-emerald-500/20 text-emerald-400' : 'hover:bg-white/5 text-slate-500'}`}>
+                {reg}
+              </button>
+            ))}
+          </CardContent>
+        </Card>
 
-        <TabsContent value="general" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>System Configuration</CardTitle>
-              <CardDescription>
-                Basic system settings and identifiers
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="wayIdLength" className="flex items-center gap-2">
-                    <Package className="w-4 h-4" />
-                    {t('settings.wayIdLength')}
-                  </Label>
-                  <Input
-                    id="wayIdLength"
-                    type="number"
-                    min="4"
-                    max="10"
-                    value={settings.wayIdLength}
-                    onChange={(e) => updateSetting('wayIdLength', parseInt(e.target.value))}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Number of digits for Way ID generation (4-10)
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="promotionCodeLength" className="flex items-center gap-2">
-                    <Percent className="w-4 h-4" />
-                    {t('settings.promotionCodeLength')}
-                  </Label>
-                  <Input
-                    id="promotionCodeLength"
-                    type="number"
-                    min="6"
-                    max="12"
-                    value={settings.promotionCodeLength}
-                    onChange={(e) => updateSetting('promotionCodeLength', parseInt(e.target.value))}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Length of promotion codes (6-12 characters)
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="contactPhone" className="flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
-                    {t('settings.contactPhone')}
-                  </Label>
-                  <Input
-                    id="contactPhone"
-                    type="tel"
-                    value={settings.contactPhone}
-                    onChange={(e) => updateSetting('contactPhone', e.target.value)}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Customer support contact number
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="maxStationDistance" className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    {t('settings.maxStationDistance')}
-                  </Label>
-                  <Input
-                    id="maxStationDistance"
-                    type="number"
-                    min="1000"
-                    max="50000"
-                    value={settings.maxStationDistance}
-                    onChange={(e) => updateSetting('maxStationDistance', parseInt(e.target.value))}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Maximum distance between stations in meters
-                  </p>
+        <Card className="col-span-9 rounded-[3rem] border-none bg-[#05080F] ring-1 ring-white/5">
+          <CardHeader className="p-8 border-b border-white/5 flex justify-between flex-row items-center">
+            <CardTitle className="text-white font-black text-xl italic">{selectedRegion} Pricing Grid</CardTitle>
+            <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+               <CheckCircle2 className="h-3 w-3 text-emerald-500" /> Ready for Production
+            </div>
+          </CardHeader>
+          <CardContent className="p-8 grid grid-cols-3 gap-4 overflow-y-auto max-h-[60vh] scrollbar-hide">
+            {NATIONWIDE_LOCATIONS[selectedRegion].map((township) => (
+              <div key={township} className="bg-[#0B101B] p-5 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all group">
+                <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block group-hover:text-emerald-400">{township}</label>
+                <div className="flex items-center bg-white/5 rounded-xl px-4 py-3 border border-transparent focus-within:border-emerald-500/50">
+                  <input type="number" placeholder="0" className="bg-transparent text-white font-black w-full outline-none text-lg" onChange={(e) => setRates({...rates, [township]: Number(e.target.value)})} />
+                  <span className="text-xs font-black text-slate-700 ml-2">MMK</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="operations" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Operational Hours & Charges</CardTitle>
-              <CardDescription>
-                Configure pickup/delivery hours and charges
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="lastPickupHour" className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    {t('settings.lastPickupHour')}
-                  </Label>
-                  <Input
-                    id="lastPickupHour"
-                    type="number"
-                    min="0"
-                    max="23"
-                    value={settings.lastPickupHour}
-                    onChange={(e) => updateSetting('lastPickupHour', parseInt(e.target.value))}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Last hour for pickup (24-hour format)
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="lastDeliverHour" className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    {t('settings.lastDeliverHour')}
-                  </Label>
-                  <Input
-                    id="lastDeliverHour"
-                    type="number"
-                    min="0"
-                    max="23"
-                    value={settings.lastDeliverHour}
-                    onChange={(e) => updateSetting('lastDeliverHour', parseInt(e.target.value))}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Last hour for delivery (24-hour format)
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="sameDayPlanHour" className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    {t('settings.sameDayPlanHour')}
-                  </Label>
-                  <Input
-                    id="sameDayPlanHour"
-                    type="number"
-                    min="0"
-                    max="23"
-                    value={settings.sameDayPlanHour}
-                    onChange={(e) => updateSetting('sameDayPlanHour', parseInt(e.target.value))}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Cut-off hour for same-day delivery planning
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="returnCharges" className="flex items-center gap-2">
-                    <Percent className="w-4 h-4" />
-                    {t('settings.returnCharges')}
-                  </Label>
-                  <Input
-                    id="returnCharges"
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={settings.returnCharges}
-                    onChange={(e) => updateSetting('returnCharges', parseInt(e.target.value))}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Return charges as percentage of delivery fee
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="automation" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Automation Settings</CardTitle>
-              <CardDescription>
-                Configure automatic system behaviors
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">{t('settings.autoAssignDeliveryman')}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Automatically assign deliverymen for pickup and delivery
-                    </p>
-                  </div>
-                  <Switch
-                    checked={settings.autoAssignDeliveryman}
-                    onCheckedChange={(checked) => updateSetting('autoAssignDeliveryman', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">{t('settings.autoCreateCustomer')}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Automatically create customer accounts for new recipients
-                    </p>
-                  </div>
-                  <Switch
-                    checked={settings.autoCreateCustomer}
-                    onCheckedChange={(checked) => updateSetting('autoCreateCustomer', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">{t('settings.autoAddRecipient')}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Automatically add recipient information to address book
-                    </p>
-                  </div>
-                  <Switch
-                    checked={settings.autoAddRecipient}
-                    onCheckedChange={(checked) => updateSetting('autoAddRecipient', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base flex items-center gap-2">
-                      <Bell className="w-4 h-4" />
-                      {t('settings.remindRefund')}
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Remind about refund money on next pickup
-                    </p>
-                  </div>
-                  <Switch
-                    checked={settings.remindRefund}
-                    onCheckedChange={(checked) => updateSetting('remindRefund', checked)}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="merchant" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Merchant Permissions</CardTitle>
-              <CardDescription>
-                Configure merchant access and permissions
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base flex items-center gap-2">
-                      <DollarSign className="w-4 h-4" />
-                      {t('settings.allowCashAdvance')}
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Allow cash advance for all merchants
-                    </p>
-                  </div>
-                  <Switch
-                    checked={settings.allowCashAdvance}
-                    onCheckedChange={(checked) => updateSetting('allowCashAdvance', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">{t('settings.allowDirectOrder')}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Allow merchants to place direct orders
-                    </p>
-                  </div>
-                  <Switch
-                    checked={settings.allowDirectOrder}
-                    onCheckedChange={(checked) => updateSetting('allowDirectOrder', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">{t('settings.allowDirectOrderAutoAssign')}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Auto-assign deliverymen for merchant direct orders
-                    </p>
-                  </div>
-                  <Switch
-                    checked={settings.allowDirectOrderAutoAssign}
-                    onCheckedChange={(checked) => updateSetting('allowDirectOrderAutoAssign', checked)}
-                    disabled={!settings.allowDirectOrder}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">{t('settings.allowDirectWayFill')}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Allow merchants to fill delivery ways directly
-                    </p>
-                  </div>
-                  <Switch
-                    checked={settings.allowDirectWayFill}
-                    onCheckedChange={(checked) => updateSetting('allowDirectWayFill', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">{t('settings.allowDirectWayFillAutoAssign')}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Auto-assign for merchant direct way fill
-                    </p>
-                  </div>
-                  <Switch
-                    checked={settings.allowDirectWayFillAutoAssign}
-                    onCheckedChange={(checked) => updateSetting('allowDirectWayFillAutoAssign', checked)}
-                    disabled={!settings.allowDirectWayFill}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

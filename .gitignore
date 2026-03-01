@@ -101,3 +101,5 @@ uploaded_files/
 
 .vercel
 .env*.local
+.env.local
+.env.server.local

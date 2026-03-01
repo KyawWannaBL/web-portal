@@ -1,154 +1,105 @@
-import React, { useState } from 'react';
-import { Shield, Save, Search, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useLanguageContext } from '@/lib/LanguageContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Database, Save, UserCog, Check, X } from 'lucide-react';
 
-// Mock data for initial setup
-const ROLES = ['SUPER_ADMIN', 'OPERATIONS_ADMIN', 'FINANCE_ADMIN', 'RIDER', 'SUBSTATION_MANAGER'];
-const PERMISSION_CATEGORIES = {
-  Operations: ['shipment.create', 'shipment.edit', 'wayplan.generate', 'pickup.verify'],
-  Finance: ['cod.reconcile', 'payout.approve', 'finance.export'],
-  UserMgmt: ['user.create', 'user.suspend', 'role.assign']
-};
+// Added Official 'Administrator' Role below Super Admin
+const ENTERPRISE_ROLES = [
+  { code: 'SYS', name: 'Super Admin (App Owner)', level: 'L5' },
+  { code: 'ADM', name: 'Administrator', level: 'L4' },
+  { code: 'AUD', name: 'Chief Auditor', level: 'L4' },
+  { code: 'FINM', name: 'Finance Manager', level: 'L3' },
+  { code: 'BMG', name: 'Branch Manager', level: 'L3' },
+  { code: 'HSC', name: 'Hub Sortation Coordinator', level: 'L2' },
+  { code: 'CUR', name: 'Fleet Courier / Rider', level: 'L1' },
+  { code: 'MER', name: 'Registered Merchant', level: 'L0' },
+  { code: 'CUS', name: 'Retail Customer', level: 'L0' },
+];
 
 export default function RoleManagement() {
-  const [selectedRole, setSelectedRole] = useState('OPERATIONS_ADMIN');
-  const [activePermissions, setActivePermissions] = useState<string[]>(['shipment.create', 'shipment.edit']);
-  const [isSaving, setIsSaving] = useState(false);
+  const { t } = useLanguageContext();
+  const [activeRole, setActiveRole] = useState(ENTERPRISE_ROLES[0]);
+  const [permissions, setPermissions] = useState<Record<string, boolean>>({});
 
-  const togglePermission = (perm: string) => {
-    setActivePermissions(prev => 
-      prev.includes(perm) ? prev.filter(p => p !== perm) : [...prev, perm]
-    );
-  };
+  useEffect(() => {
+    // Super Admin gets everything by default. Others depend on their tier.
+    setPermissions({
+      'FIN-01': activeRole.level === 'L5' || activeRole.level === 'L4' || activeRole.level === 'L3',
+      'ADM-02': activeRole.level === 'L5' || activeRole.level === 'L4',
+      'OPS-04': activeRole.level === 'L5' || activeRole.level === 'L4' || activeRole.level === 'L3',
+      'SEC-01': activeRole.level === 'L5', // Only Super Admin can decrypt PII
+    });
+  }, [activeRole]);
 
-  const handleSave = () => {
-    setIsSaving(true);
-    // Simulate API Call
-    setTimeout(() => {
-      setIsSaving(false);
-      alert(`Permissions updated for ${selectedRole}`);
-    }, 1000);
+  const handleToggle = (code: string, isAllowed: boolean) => {
+    setPermissions(prev => ({ ...prev, [code]: isAllowed }));
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+    <div className="p-10 space-y-10 bg-[#0B101B] min-h-screen text-slate-300">
+      <div className="flex justify-between items-start bg-[#05080F] p-10 rounded-[3rem] shadow-2xl border border-white/5">
         <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">
-            Access Control
-          </h1>
-          <p className="text-slate-400 mt-1">Manage system-wide roles and granular permission sets.</p>
+          <h1 className="text-4xl font-black uppercase tracking-tighter text-white">Authority Matrix</h1>
+          <p className="text-emerald-500 font-mono text-sm mt-2 tracking-widest uppercase">Global Role Configuration</p>
         </div>
-        <button 
-          onClick={handleSave}
-          disabled={isSaving}
-          className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold shadow-lg shadow-emerald-600/20 transition-all disabled:opacity-50"
-        >
-          {isSaving ? <div className="h-5 w-5 border-2 border-white/30 border-t-white animate-spin rounded-full" /> : <Save size={18} />}
-          Save Changes
-        </button>
+        <Button className="bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl h-14 px-10">
+          <Save className="mr-2 h-6 w-6" /> Save Matrix
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Role Selector Sidebar */}
-        <div className="lg:col-span-1 space-y-4">
-          <div className="luxury-glass p-4 rounded-2xl border border-slate-700/50">
-            <div className="flex items-center gap-2 text-slate-400 mb-4 px-2">
-              <Search size={16} />
-              <span className="text-xs font-bold uppercase tracking-widest">Select Role</span>
-            </div>
-            <div className="space-y-1">
-              {ROLES.map(role => (
-                <button
-                  key={role}
-                  onClick={() => setSelectedRole(role)}
-                  className={`w-full text-left px-4 py-3 rounded-xl transition-all ${
-                    selectedRole === role 
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-lg shadow-emerald-500/5' 
-                      : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{role.replace('_', ' ')}</span>
-                    {selectedRole === role && <CheckCircle2 size={14} />}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10">
-            <div className="flex gap-2 text-amber-500 mb-2">
-              <AlertCircle size={16} />
-              <span className="text-xs font-bold uppercase">Security Note</span>
-            </div>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Changes to permissions take effect immediately upon the user's next session synchronization.
-            </p>
-          </div>
+      <div className="grid grid-cols-12 gap-10">
+        <div className="col-span-4 space-y-3 h-[600px] overflow-y-auto pr-2">
+          {ENTERPRISE_ROLES.map(role => {
+            const isActive = activeRole.code === role.code;
+            return (
+              <button key={role.code} onClick={() => setActiveRole(role)}
+                className={`w-full p-6 rounded-[2rem] text-left transition-all border-2 flex items-center justify-between ${
+                  isActive ? 'bg-emerald-500/10 border-emerald-500 text-white shadow-lg' : 'bg-white/5 border-transparent text-slate-400 hover:bg-white/10'
+                }`}
+              >
+                <div>
+                  <p className="font-black text-lg">{role.name}</p>
+                  <p className={`text-xs font-mono mt-1 ${isActive ? 'text-emerald-400' : 'text-slate-500'}`}>{role.code} • {role.level}</p>
+                </div>
+                <UserCog className={`h-6 w-6 ${isActive ? 'text-emerald-500' : 'text-slate-600'}`} />
+              </button>
+            );
+          })}
         </div>
 
-        {/* Permission Matrix */}
-        <div className="lg:col-span-3 space-y-6">
-          {Object.entries(PERMISSION_CATEGORIES).map(([category, perms]) => (
-            <div key={category} className="luxury-glass rounded-2xl border border-slate-700/50 overflow-hidden">
-              <div className="px-6 py-4 bg-slate-800/30 border-b border-slate-700/50 flex items-center justify-between">
-                <h3 className="text-white font-bold tracking-wide">{category} Permissions</h3>
-                <span className="text-[10px] bg-slate-700 px-2 py-1 rounded text-slate-300 uppercase font-mono">
-                  Module: {category.toLowerCase()}
-                </span>
-              </div>
-              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {perms.map(perm => (
-                  <div 
-                    key={perm}
-                    onClick={() => togglePermission(perm)}
-                    className={`group flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${
-                      activePermissions.includes(perm)
-                        ? 'bg-emerald-500/5 border-emerald-500/30'
-                        : 'bg-slate-900/40 border-slate-800 hover:border-slate-600'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg transition-colors ${activePermissions.includes(perm) ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-500'}`}>
-                        <Shield size={16} />
-                      </div>
-                      <div>
-                        <p className={`text-sm font-semibold transition-colors ${activePermissions.includes(perm) ? 'text-white' : 'text-slate-400'}`}>
-                          {perm.split('.').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')}
-                        </p>
-                        <p className="text-[10px] text-slate-500 font-mono">{perm}</p>
-                      </div>
-                    </div>
-                    <div className={`h-5 w-5 rounded-md border-2 transition-all flex items-center justify-center ${
-                      activePermissions.includes(perm) 
-                        ? 'bg-emerald-500 border-emerald-500' 
-                        : 'border-slate-700 group-hover:border-slate-500'
-                    }`}>
-                      {activePermissions.includes(perm) && <CheckCircle2 size={12} className="text-white" />}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+        <Card className="col-span-8 rounded-[3rem] border-none shadow-2xl bg-[#05080F] ring-1 ring-white/5">
+          <CardHeader className="bg-white/5 p-8 border-b border-white/5">
+            <CardTitle className="text-2xl font-black text-white flex items-center gap-4">
+              <Database className="text-emerald-500 h-8 w-8" /> {activeRole.name} Authority Level
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-10 grid grid-cols-1 gap-6">
+            <RedGreenToggle label="Financial Disbursal Approval" code="FIN-01" allowed={!!permissions['FIN-01']} onChange={handleToggle} disabled={activeRole.code === 'SYS'} />
+            <RedGreenToggle label="Manage Users & Merchants" code="ADM-02" allowed={!!permissions['ADM-02']} onChange={handleToggle} disabled={activeRole.code === 'SYS'} />
+            <RedGreenToggle label="Logistics & Waybill Overrides" code="OPS-04" allowed={!!permissions['OPS-04']} onChange={handleToggle} disabled={activeRole.code === 'SYS'} />
+            <RedGreenToggle label="Super Admin Deep Encryption Access" code="SEC-01" allowed={!!permissions['SEC-01']} onChange={handleToggle} disabled={activeRole.code === 'SYS'} />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
 
-          {/* Critical Actions Protection */}
-          <div className="p-6 rounded-2xl border border-red-500/20 bg-red-500/5 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
-                <Lock size={24} />
-              </div>
-              <div>
-                <h4 className="text-white font-bold">Restrictive Mode</h4>
-                <p className="text-sm text-slate-400">Force multi-factor authentication for this role on sensitive operations.</p>
-              </div>
-            </div>
-            <div className="h-6 w-11 bg-slate-700 rounded-full relative cursor-not-allowed">
-              <div className="absolute left-1 top-1 h-4 w-4 bg-slate-500 rounded-full" />
-            </div>
-          </div>
-        </div>
+function RedGreenToggle({ label, code, allowed, onChange, disabled }: any) {
+  return (
+    <div className={`flex items-center justify-between p-6 bg-white/5 rounded-[2rem] border border-white/5 ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
+      <div>
+        <p className="font-black text-white text-lg">{label}</p>
+        <p className="text-[10px] font-mono text-slate-500 mt-1 uppercase">MODULE: {code}</p>
+      </div>
+      <div className="flex bg-[#0B101B] rounded-xl p-1 border border-white/10">
+        <button onClick={() => onChange(code, true)} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all ${allowed ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'text-slate-500'}`}>
+          <Check className="h-4 w-4" /> ALLOW
+        </button>
+        <button onClick={() => onChange(code, false)} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-black text-sm transition-all ${!allowed ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'text-slate-500'}`}>
+          <X className="h-4 w-4" /> DENY
+        </button>
       </div>
     </div>
   );

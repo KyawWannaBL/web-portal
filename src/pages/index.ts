@@ -7,7 +7,6 @@ export { default as ResetPassword } from "./ResetPassword";
 export { default as Dashboard } from "./Dashboard";
 export { default as AdminDashboard } from "./AdminDashboard";
 export { default as Operations } from "./Operations";
-export { default as Shipments } from "./Shipments";
 export { default as DataEntry } from "./DataEntry";
 
 export { default as Finance } from "./Finance";
