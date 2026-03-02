@@ -1,4 +1,6 @@
-// Back-compat shim: some legacy modules import from "@/supabaseClient" or "../supabaseClient".
-// The canonical client lives in src/lib/supabase.ts.
+import { createClient } from '@supabase/supabase-js';
 
-export { supabase } from "@/lib/supabase";
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
