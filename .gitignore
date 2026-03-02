@@ -103,3 +103,5 @@ uploaded_files/
 .env*.local
 .env.local
 .env.server.local
+public/app-debug.apk
+*.apk
