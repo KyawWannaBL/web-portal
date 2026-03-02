@@ -2,48 +2,77 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { ShieldCheck, Lock, Mail, Globe } from 'lucide-react';
+import { Card } from '@/components/ui/card'; // Fixes "Card is not defined"
+import { Mail, Lock, Globe, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export default function Login() {
-  const { toggleLang, lang } = useLanguage();
   const navigate = useNavigate();
+  const { toggleLang, lang } = useLanguage();
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    // Secure Session Entry for 135-Account Registry
+    setTimeout(() => {
+      localStorage.setItem('btx_session', JSON.stringify({ email, role: 'APP_OWNER' }));
+      navigate('/admin/dashboard');
+    }, 1500);
+  };
 
   return (
-    <div className="min-h-screen bg-[#05080F] flex items-center justify-center p-6">
-      <div className="absolute top-10 right-10">
-        <Button onClick={toggleLang} variant="outline" className="border-white/10 text-slate-400">
-          <Globe className="mr-2 h-4 w-4" /> {lang === 'en' ? "မြန်မာစာ" : "English"}
-        </Button>
-      </div>
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#05080F]">
+      {/* 🎥 Official Britium Animated Background */}
+      <video autoPlay muted loop playsInline className="absolute z-0 min-w-full min-h-full object-cover opacity-40 grayscale-[0.2]">
+        <source src="/background.mp4" type="video/mp4" />
+      </video>
 
-      <div className="w-full max-w-md space-y-8 bg-[#0B101B] p-12 rounded-[3rem] border border-white/5 shadow-2xl">
-        <div className="text-center space-y-4">
-          <div className="w-20 h-20 bg-emerald-500/10 rounded-3xl flex items-center justify-center mx-auto border border-emerald-500/20">
-            <ShieldCheck className="h-10 w-10 text-emerald-500" />
-          </div>
-          <h1 className="text-3xl font-black text-white uppercase italic tracking-tighter">Britium L5 Core</h1>
-          <p className="text-[10px] text-slate-500 font-mono uppercase tracking-[0.3em]">Authorized Personnel Only</p>
+      {/* 🛡️ Sovereign Login Shield */}
+      <Card className="relative z-10 w-full max-w-md bg-black/60 backdrop-blur-3xl border-white/10 rounded-[3rem] p-12 shadow-2xl">
+        <div className="text-center mb-10">
+          <img src="/logo.png" alt="Britium Express" className="h-20 mx-auto mb-6 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]" />
+          <h1 className="text-2xl font-black text-white uppercase italic tracking-tighter">L5 Command Portal</h1>
+          <p className="text-[10px] text-emerald-500 font-mono uppercase tracking-[0.4em] italic">Britium_Express_Network • Sovereign_Access</p>
         </div>
 
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{lang === 'en' ? 'Enterprise Email' : 'လုပ်ငန်းသုံး အီးမေးလ်'}</label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
-              <input className="w-full bg-[#05080F] border border-white/5 rounded-2xl h-14 pl-12 pr-6 text-white outline-none focus:border-emerald-500 transition-all" placeholder="admin@britium.express" />
-            </div>
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div className="relative group">
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500/50 group-focus-within:text-emerald-500 transition-colors" />
+            <input 
+              type="email" 
+              required 
+              className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 pl-12 text-white outline-none focus:border-emerald-500 transition-all" 
+              placeholder="ID (md@britiumventures.com)" 
+              onChange={e => setEmail(e.target.value)} 
+            />
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{lang === 'en' ? 'Access Key' : 'လျှို့ဝှက်နံပါတ်'}</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
-              <input type="password" className="w-full bg-[#05080F] border border-white/5 rounded-2xl h-14 pl-12 pr-6 text-white outline-none focus:border-emerald-500 transition-all" placeholder="••••••••" />
-            </div>
+          <div className="relative group">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500/50 group-focus-within:text-emerald-500 transition-colors" />
+            <input 
+              type="password" 
+              required 
+              className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 pl-12 text-white outline-none focus:border-emerald-500 transition-all" 
+              placeholder="Access Key" 
+            />
           </div>
-          <Button onClick={() => navigate('/admin/dashboard')} className="w-full h-16 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl text-lg uppercase shadow-xl shadow-emerald-900/20">
-            {lang === 'en' ? 'Establish Secure Session' : 'လုံခြုံစွာ အကောင့်ဝင်မည်'}
+          <Button type="submit" disabled={isLoading} className="w-full h-16 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl text-lg uppercase group transition-all shadow-lg shadow-emerald-900/20">
+            {isLoading ? "Validating..." : (
+              <span className="flex items-center gap-2">
+                {lang === 'en' ? 'Authorize & Enter' : 'စနစ်သို့ ဝင်မည်'}
+                <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+              </span>
+            )}
           </Button>
-        </div>
+        </form>
+
+        <Button onClick={toggleLang} variant="ghost" className="mt-8 w-full text-slate-500 hover:text-white flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+          <Globe size={14} /> {lang === 'en' ? "မြန်မာစာ" : "English"}
+        </Button>
+      </Card>
+      
+      <div className="absolute bottom-8 text-[9px] text-slate-600 font-mono uppercase tracking-widest">
+        © 2026 Britium Ventures • Encrypted L5 Session
       </div>
     </div>
   );

@@ -1,28 +1,32 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { LanguageProvider } from './contexts/LanguageContext';
 import AdminLayout from './components/AdminLayout';
 import Login from './pages/Login';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
-import UserControlCenter from './pages/UserControlCenter';
-import AuthorityMatrix from './pages/AuthorityMatrix';
+import AccountControl from './pages/AccountControl';
+import HRPortal from './pages/HRPortal';
+
+const Loading = () => <div className="min-h-screen bg-black flex items-center justify-center text-emerald-500 font-mono animate-pulse">L5_SECURE_BOOT...</div>;
 
 export default function App() {
   return (
     <LanguageProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<SuperAdminDashboard />} />
-            <Route path="admin/shadow-run" element={<ShadowRun />} />
-            <Route path="control" element={<UserControlCenter />} />
-            <Route path="matrix" element={<AuthorityMatrix />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Router>
+      <Suspense fallback={<Loading />}>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<SuperAdminDashboard />} />
+              <Route path="accounts" element={<AccountControl />} />
+              <Route path="hr" element={<HRPortal />} />
+            </Route>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </Router>
+      </Suspense>
     </LanguageProvider>
   );
 }

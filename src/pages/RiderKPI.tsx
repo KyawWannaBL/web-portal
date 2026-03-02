@@ -1,26 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { formatCurrency } from '@/lib/constants';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
-  Trophy, Timer, Zap, Wallet, 
-  Search, Globe, Filter, ArrowUpRight, 
-  ChevronRight, Star 
+  Trophy, Clock, Zap, Map, 
+  Globe, Search, TrendingUp, Users 
 } from 'lucide-react';
 
 export default function RiderKPI() {
   const { toggleLang, lang } = useLanguage();
-  
-  // Enterprise Mock Data for Rider Performance
+
+  // Scrutinized Mock Data (Bilingual)
   const riderStats = [
-    { id: 'RDR-001', name: 'Zayar Min', success: 98.4, avgTime: '18m', earnings: '145,000', rating: 4.9 },
-    { id: 'RDR-002', name: 'Kyaw Kyaw', success: 94.2, avgTime: '22m', earnings: '112,500', rating: 4.7 },
-    { id: 'RDR-003', name: 'Aung Ko', success: 89.1, avgTime: '31m', earnings: '88,000', rating: 4.2 }
+    { name: 'Kyaw Kyaw', hub: 'Yangon', deliveries: 42, speed: '14m', earnings: 85000, status: 'EXCELLENT' },
+    { name: 'Min Min', hub: 'Mandalay', deliveries: 38, speed: '18m', earnings: 72000, status: 'GOOD' },
+    { name: 'Hsu Myat', hub: 'NPT', deliveries: 31, speed: '22m', earnings: 64000, status: 'STABLE' }
   ];
 
   return (
     <div className="p-10 space-y-10 bg-[#0B101B] min-h-screen text-slate-300">
-      {/* Executive Header (အမှုဆောင်အရာရှိများအတွက် ခေါင်းစဉ်) */}
+      {/* Dynamic Header (ခေါင်းစဉ်အပိုင်း) */}
       <div className="flex justify-between items-center bg-[#05080F] p-10 rounded-[3rem] border border-white/5 shadow-2xl">
         <div className="flex items-center gap-6">
           <div className="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
@@ -28,80 +28,73 @@ export default function RiderKPI() {
           </div>
           <div>
             <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter">
-              {lang === 'en' ? 'Rider Performance' : 'ယာဉ်မောင်း စွမ်းဆောင်ရည်'}
+              {lang === 'en' ? 'Rider KPI Tracker' : 'ယာဉ်မောင်း စွမ်းဆောင်ရည် မှတ်တမ်း'}
             </h1>
-            <p className="text-amber-500 font-mono text-[10px] mt-1 uppercase tracking-widest">
-              {lang === 'en' ? 'L5_ORCHESTRATION_SURVEILLANCE' : 'အဆင့်_၅_လုပ်ငန်း_စောင့်ကြည့်စနစ်'}
+            <p className="text-amber-500 font-mono text-xs mt-1 uppercase tracking-widest">
+              L5_PERFORMANCE_METRICS • {lang === 'en' ? 'REAL_TIME_SURVEILLANCE' : 'တိုက်ရိုက်_စောင့်ကြည့်စစ်ဆေးမှု'}
             </p>
           </div>
         </div>
         <div className="flex gap-4">
-          <Button onClick={toggleLang} className="bg-white/5 border border-white/10 text-white h-12 px-8 rounded-xl">
+          <Button onClick={toggleLang} className="bg-white/5 border border-white/10 text-white h-12 px-8 rounded-xl hover:bg-emerald-600 transition-all">
              <Globe className="mr-2 h-4 w-4" /> {lang === 'en' ? "မြန်မာစာ" : "English"}
           </Button>
         </div>
       </div>
 
-      {/* Global Performance KPIs */}
+      {/* Global Performance Cards (အထွေထွေ အချက်အလက်များ) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {[
-          { label: 'Avg Delivery Speed', val: '24.5 min', icon: Timer, color: 'text-sky-400' },
-          { label: 'Success Velocity', val: '96.2%', icon: Zap, color: 'text-emerald-400' },
-          { label: 'Total Payouts', val: '12.4M K', icon: Wallet, color: 'text-amber-400' }
+          { label: lang === 'en' ? 'Active Riders' : 'လက်ရှိ ဝန်ထမ်းများ', val: '334', icon: Users, color: 'text-sky-400' },
+          { label: lang === 'en' ? 'Avg Delivery Time' : 'ပျမ်းမျှ ပို့ဆောင်ချိန်', val: '19.4 min', icon: Clock, color: 'text-amber-400' },
+          { label: lang === 'en' ? 'Daily Commissions' : 'နေ့စဉ် ကော်မရှင် စုစုပေါင်း', val: '4.2M MMK', icon: TrendingUp, color: 'text-emerald-400' }
         ].map((kpi, i) => (
-          <Card key={i} className="bg-[#05080F] border-none ring-1 ring-white/5 rounded-[2.5rem] p-8">
-            <kpi.icon className={`h-8 w-8 mb-4 ${kpi.color}`} />
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{kpi.label}</p>
-            <p className="text-3xl text-white font-black mt-2 tracking-tighter">{kpi.val}</p>
+          <Card key={i} className="bg-[#05080F] border-none ring-1 ring-white/5 rounded-[2.5rem] p-8 flex items-center gap-6">
+            <div className="p-3 bg-white/5 rounded-xl"><kpi.icon className={kpi.color} /></div>
+            <div>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{kpi.label}</p>
+              <p className="text-3xl text-white font-black">{kpi.val}</p>
+            </div>
           </Card>
         ))}
       </div>
 
-      {/* Rider Surveillance Matrix (ယာဉ်မောင်း စောင့်ကြည့်မှု ဇယား) */}
+      {/* Personnel Efficiency Matrix (ဝန်ထမ်းများ၏ စွမ်းဆောင်ရည် ဇယား) */}
       <Card className="bg-[#05080F] border-none ring-1 ring-white/5 rounded-[3rem] overflow-hidden">
         <div className="p-8 border-b border-white/5 flex justify-between items-center">
-          <div className="relative w-96">
+          <h2 className="text-xl font-black text-white uppercase italic">
+            {lang === 'en' ? 'Performance Leaderboard' : 'စွမ်းဆောင်ရည် အကောင်းဆုံးစာရင်း'}
+          </h2>
+          <div className="relative w-80">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-            <input className="w-full bg-[#0B101B] border border-white/10 rounded-full h-12 pl-12 pr-6 text-sm" placeholder={lang === 'en' ? "Search Rider ID or Name..." : "ယာဉ်မောင်း အိုင်ဒီ (သို့) အမည်ဖြင့် ရှာဖွေရန်..."} />
+            <input className="w-full bg-[#0B101B] border border-white/10 rounded-full h-12 pl-12 text-sm" placeholder="Filter by Name or Hub..." />
           </div>
-          <Button variant="outline" className="h-12 border-white/10 text-slate-400 px-6 rounded-xl">
-            <Filter className="mr-2 h-4 w-4" /> {lang === 'en' ? 'Filters' : 'စစ်ထုတ်ရန်'}
-          </Button>
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-white/5 text-[10px] text-slate-500 font-mono uppercase tracking-widest">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-white/5 font-mono text-slate-500 uppercase text-[10px] tracking-widest">
               <tr>
-                <th className="p-8">{lang === 'en' ? 'Rider Identity' : 'ယာဉ်မောင်း အချက်အလက်'}</th>
-                <th className="p-8">{lang === 'en' ? 'Success Rate' : 'အောင်မြင်မှုနှုန်း'}</th>
-                <th className="p-8">{lang === 'en' ? 'Avg Time' : 'ပျမ်းမျှကြာချိန်'}</th>
-                <th className="p-8">{lang === 'en' ? 'Commission' : 'ကော်မရှင်'}</th>
-                <th className="p-8 text-right">{lang === 'en' ? 'Actions' : 'လုပ်ဆောင်ချက်'}</th>
+                <th className="p-6">{lang === 'en' ? 'Rider' : 'ယာဉ်မောင်း အမည်'}</th>
+                <th className="p-6">{lang === 'en' ? 'Hub' : 'ဗဟိုဌာန'}</th>
+                <th className="p-6">{lang === 'en' ? 'EOD Deliveries' : 'ပို့ဆောင်မှု အရေအတွက်'}</th>
+                <th className="p-6">{lang === 'en' ? 'Speed' : 'ပျမ်းမျှ အချိန်'}</th>
+                <th className="p-6">{lang === 'en' ? 'Earnings' : 'ရရှိငွေ'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {riderStats.map((r) => (
-                <tr key={r.id} className="group hover:bg-white/5 transition-all">
-                  <td className="p-8">
-                    <p className="font-bold text-white text-lg">{r.name}</p>
-                    <p className="text-[10px] text-slate-500 font-mono uppercase tracking-widest">{r.id}</p>
-                  </td>
-                  <td className="p-8">
+              {riderStats.map((rider, i) => (
+                <tr key={i} className="hover:bg-white/5 transition-all">
+                  <td className="p-6">
                     <div className="flex items-center gap-3">
-                      <div className="flex-1 h-1.5 bg-white/5 rounded-full w-24 overflow-hidden">
-                        <div className="h-full bg-emerald-500" style={{ width: `${r.success}%` }}></div>
-                      </div>
-                      <span className="text-emerald-400 font-black text-xs">{r.success}%</span>
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-black text-[10px]">{rider.name[0]}</div>
+                      <span className="font-bold text-white">{rider.name}</span>
                     </div>
                   </td>
-                  <td className="p-8 font-mono text-white font-bold">{r.avgTime}</td>
-                  <td className="p-8 font-black text-amber-500">{r.earnings} MMK</td>
-                  <td className="p-8 text-right">
-                    <Button variant="ghost" className="h-10 px-4 text-sky-400 hover:bg-sky-500/10 font-black text-[10px] uppercase">
-                      {lang === 'en' ? 'View Details' : 'အသေးစိတ်ကြည့်ရန်'} <ChevronRight className="ml-2 h-3 w-3" />
-                    </Button>
-                  </td>
+                  <td className="p-6 text-slate-400 font-mono text-xs">{rider.hub}</td>
+                  <td className="p-6 font-black text-white">{rider.deliveries}</td>
+                  <td className="p-6 text-sky-400 font-bold">{rider.speed}</td>
+                  <td className="p-6 font-black text-emerald-400">{formatCurrency(rider.earnings)}</td>
                 </tr>
               ))}
             </tbody>
