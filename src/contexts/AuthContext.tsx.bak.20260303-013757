@@ -1,10 +1,15 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/supabaseClient";
 
-type AuthUser = { id: string; email?: string | null };
+type Profile = {
+  id: string;
+  role: string | null;
+  must_change_password: boolean | null;
+  permissions?: string[] | null;
+};
 
-type AuthContextValue = {
-  user: AuthUser | null;
+type AuthCtx = {
+  user: { id: string; email?: string } | null;
   role: string | null;
   permissions: string[];
   mustChangePassword: boolean;
@@ -15,10 +20,9 @@ type AuthContextValue = {
   refresh: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextValue | null>(null);
+const Ctx = createContext<AuthCtx | null>(null);
 
-async function fetchProfile(userId: string) {
-  // Requires RLS: authenticated can SELECT own profile row
+async function loadProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
     .select("id, role, must_change_password, permissions")
@@ -30,7 +34,7 @@ async function fetchProfile(userId: string) {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthCtx["user"]>(null);
   const [role, setRole] = useState<string | null>(null);
   const [permissions, setPermissions] = useState<string[]>([]);
   const [mustChangePassword, setMustChangePassword] = useState(false);
@@ -49,13 +53,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const u = session.user;
     setUser({ id: u.id, email: u.email });
 
-    const profile = await fetchProfile(u.id);
+    const profile = await loadProfile(u.id);
     setRole(profile?.role ?? null);
+    setPermissions(Array.isArray(profile?.permissions) ? (profile!.permissions as any) : []);
     setMustChangePassword(Boolean(profile?.must_change_password));
-
-    const perms = profile?.permissions;
-    setPermissions(Array.isArray(perms) ? perms : []);
-
     setLoading(false);
   };
 
@@ -76,11 +77,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error || !data?.session) {
+    if (error) {
       setLoading(false);
       return { success: false, message: "Invalid clearance credentials." };
     }
-    await hydrate(data.session);
+    await hydrate({ user: data.user });
     return { success: true, message: "OK" };
   };
 
@@ -89,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await refresh();
   };
 
-  const value = useMemo<AuthContextValue>(
+  const value: AuthCtx = useMemo(
     () => ({
       user,
       role,
@@ -104,11 +105,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [user, role, permissions, mustChangePassword, loading]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() {
-  const v = useContext(AuthContext);
+  const v = useContext(Ctx);
   if (!v) throw new Error("useAuth must be used within AuthProvider");
   return v;
 }

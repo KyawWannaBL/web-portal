@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/auth/AuthProvider";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function AuthCallback() {
   const nav = useNavigate();

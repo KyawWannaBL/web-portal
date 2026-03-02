@@ -3,19 +3,24 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
+import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { AuthProvider } from "@/auth/AuthProvider";
+import ConfigFault from "@/components/ConfigFault";
+import { validateEnv } from "@/lib/env";
 
-const root = document.getElementById("root");
+const env = validateEnv();
+const root = document.getElementById("root")!;
 
-if (root) {
-  ReactDOM.createRoot(root).render(
-    <React.StrictMode>
-      <ErrorBoundary>
+ReactDOM.createRoot(root).render(
+  <React.StrictMode>
+    <ErrorBoundary>
+      {env.ok ? (
         <AuthProvider>
           <App />
         </AuthProvider>
-      </ErrorBoundary>
-    </React.StrictMode>
-  );
-}
+      ) : (
+        <ConfigFault missing={env.missing} />
+      )}
+    </ErrorBoundary>
+  </React.StrictMode>
+);

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "@/auth/AuthProvider";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function RequirePasswordRotation() {
   const { mustChangePassword, loading } = useAuth();

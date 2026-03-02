@@ -1,45 +1,46 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+/// <reference lib="deno.ns" />
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-serve(async (req) => {
-  // Setup standard CORS headers so your React app can call this function
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  }
-
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
-
+Deno.serve(async (req) => {
   try {
-    // Connect to Supabase using the environment variables automatically provided to Edge Functions
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
-    )
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const bucket = Deno.env.get("APK_BUCKET") || "artifacts";
+    const objectPath = Deno.env.get("APK_OBJECT_PATH") || "britium-release.apk";
+    const ttl = Number(Deno.env.get("APK_SIGNED_URL_TTL_SECONDS") || "60");
+    const sha256 = Deno.env.get("APK_SHA256") || null;
 
-    // 1. Verify the user is actually logged in
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
-    if (authError || !user) throw new Error("Unauthorized: Invalid Session")
+    const auth = req.headers.get("Authorization") || "";
+    if (!auth.startsWith("Bearer ")) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
 
-    // 2. Generate the 60-second Signed URL for the APK
-    const { data, error } = await supabaseClient.storage
-      .from('artifacts')
-      .createSignedUrl('britium-release.apk', 60)
+    const supabase = createClient(supabaseUrl, serviceKey, { global: { headers: { Authorization: auth } } });
 
-    if (error) throw error
+    const { data: u, error: ue } = await supabase.auth.getUser();
+    if (ue || !u?.user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
 
-    return new Response(JSON.stringify(data), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    const userId = u.user.id;
+
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", userId).single();
+    const role = profile?.role || "";
+    const allow = ["RDR", "MGR", "SUPER_ADMIN", "OPERATIONS_ADMIN"].includes(role);
+    if (!allow) return new Response(JSON.stringify({ error: "AccessDenied" }), { status: 403 });
+
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "unknown";
+
+    await supabase.from("audit_logs").insert({
+      user_id: userId,
+      event_type: "APK_DOWNLOAD",
+      metadata: { ip, artifact: objectPath, ttl },
+    });
+
+    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(objectPath, ttl);
+    if (error || !data?.signedUrl) return new Response(JSON.stringify({ error: "SignedUrlFailed" }), { status: 500 });
+
+    return new Response(JSON.stringify({ signedUrl: data.signedUrl, sha256 }), {
+      headers: { "Content-Type": "application/json" },
       status: 200,
-    })
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
-    })
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: String(e?.message || e) }), { status: 500 });
   }
-})
+});

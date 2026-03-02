@@ -1,9 +1,9 @@
 export default function Unauthorized() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-8">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-black">Unauthorized</h1>
-        <p className="mt-2 text-sm opacity-70">You don’t have permission to access this area.</p>
+    <div className="min-h-screen flex items-center justify-center p-8 bg-[#05080F] text-white">
+      <div className="max-w-md w-full border border-rose-500/30 rounded-2xl p-6 bg-black/40 text-center">
+        <h1 className="text-sm font-black tracking-widest uppercase text-rose-400">Unauthorized</h1>
+        <p className="text-xs opacity-80 mt-2">Access denied by RBAC policy.</p>
       </div>
     </div>
   );
