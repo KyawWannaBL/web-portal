@@ -1,470 +1,119 @@
 import React, { useState } from 'react';
-import { useLanguageContext } from '@/lib/LanguageContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { 
-  Store, 
-  Plus, 
-  Receipt, 
-  DollarSign, 
-  CreditCard, 
-  Calendar, 
-  Search,
-  Filter,
-  Download,
-  Eye,
-  Edit,
-  MoreHorizontal,
-  Phone,
-  Mail,
-  MapPin
+  Store, UserPlus, Search, Globe, MapPin, 
+  ShieldCheck, Package, ExternalLink, Filter 
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-interface Merchant {
-  id: string;
-  merchantId: string;
-  name: string;
-  phone: string;
-  email: string;
-  address: string;
-  activeWays: number;
-  completedWays: number;
-  toRefund: number;
-  priceProfile: string;
-  status: 'active' | 'inactive' | 'suspended';
-  joinDate: string;
-  totalRevenue: number;
-}
-
-const mockMerchants: Merchant[] = [
-  {
-    id: '1',
-    merchantId: 'M001',
-    name: 'Golden Shop',
-    phone: '+95 9 123 456 789',
-    email: 'golden@shop.com',
-    address: 'Yangon, Kamayut Township',
-    activeWays: 15,
-    completedWays: 245,
-    toRefund: 50000,
-    priceProfile: 'Premium',
-    status: 'active',
-    joinDate: '2025-01-15',
-    totalRevenue: 2500000
-  },
-  {
-    id: '2',
-    merchantId: 'M002',
-    name: 'Tech Store Myanmar',
-    phone: '+95 9 987 654 321',
-    email: 'tech@store.mm',
-    address: 'Mandalay, Chan Aye Thar Zan',
-    activeWays: 8,
-    completedWays: 156,
-    toRefund: 25000,
-    priceProfile: 'Standard',
-    status: 'active',
-    joinDate: '2025-03-20',
-    totalRevenue: 1800000
-  },
-  {
-    id: '3',
-    merchantId: 'M003',
-    name: 'Fashion Hub',
-    phone: '+95 9 555 666 777',
-    email: 'fashion@hub.com',
-    address: 'Yangon, Bahan Township',
-    activeWays: 3,
-    completedWays: 89,
-    toRefund: 15000,
-    priceProfile: 'Basic',
-    status: 'inactive',
-    joinDate: '2025-06-10',
-    totalRevenue: 950000
-  }
-];
 
 export default function Merchants() {
-  const { t, language } = useLanguageContext();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('list');
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const { t, toggleLang, lang } = useLanguage();
+  const [view, setView] = useState<'list' | 'provision'>('list');
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      active: { variant: 'default' as const, label: 'Active' },
-      inactive: { variant: 'secondary' as const, label: 'Inactive' },
-      suspended: { variant: 'destructive' as const, label: 'Suspended' }
-    };
-    
-    const config = statusConfig[status as keyof typeof statusConfig];
-    return <Badge variant={config.variant}>{config.label}</Badge>;
-  };
-
-  const filteredMerchants = mockMerchants.filter(merchant => 
-    merchant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    merchant.merchantId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    merchant.phone.includes(searchTerm)
-  );
-
-  const AddMerchantDialog = () => (
-    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          {t('merchant.addNew')}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{t('merchant.addNew')}</DialogTitle>
-          <DialogDescription>
-            Add a new merchant to the system
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">{t('merchant.name')}</Label>
-              <Input id="name" placeholder="Enter merchant name" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">{t('merchant.phone')}</Label>
-              <Input id="phone" placeholder="+95 9 xxx xxx xxx" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="merchant@example.com" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
-            <Textarea id="address" placeholder="Enter full address" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="priceProfile">{t('merchant.priceProfile')}</Label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Select price profile" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="basic">Basic</SelectItem>
-                <SelectItem value="standard">Standard</SelectItem>
-                <SelectItem value="premium">Premium</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-            {t('form.cancel')}
-          </Button>
-          <Button onClick={() => setIsAddDialogOpen(false)}>
-            {t('form.save')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+  // Enterprise Mock Data
+  const merchantRegistry = [
+    { id: 'M-1024', name: 'Yangon Tech Spares', city: 'Yangon', type: 'Electronics', status: 'ACTIVE' },
+    { id: 'M-2055', name: 'Mandalay Fashion House', city: 'Mandalay', type: 'Apparel', status: 'PENDING' },
+    { id: 'M-3088', name: 'NPT Office Supplies', city: 'Nay Pyi Taw', type: 'Stationery', status: 'ACTIVE' }
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('nav.merchants')}</h1>
-          <p className="text-muted-foreground">
-            Manage merchants, receipts, and financial operations
-          </p>
+    <div className="p-10 space-y-8 bg-[#0B101B] min-h-screen text-slate-300">
+      {/* Dynamic Bilingual Header */}
+      <div className="flex justify-between items-center bg-[#05080F] p-10 rounded-[3rem] border border-white/5 shadow-2xl">
+        <div className="flex items-center gap-6">
+          <div className="p-4 bg-sky-500/10 rounded-2xl border border-sky-500/20">
+            <Store className="h-8 w-8 text-sky-500" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-black text-white uppercase tracking-tighter italic">
+              {lang === 'en' ? 'Merchant Management' : 'ကုန်သည် စီမံခန့်ခွဲမှု'}
+            </h1>
+            <p className="text-sky-500 font-mono text-xs mt-1 uppercase tracking-widest">
+              {lang === 'en' ? 'L5_PARTNER_PROVISIONING' : 'အဆင့်_၅_ကုန်သည်_မှတ်ပုံတင်ခြင်း'}
+            </p>
+          </div>
         </div>
-        <AddMerchantDialog />
+        <div className="flex gap-4">
+          <Button onClick={() => setView(view === 'list' ? 'provision' : 'list')} className="bg-sky-600 hover:bg-sky-500 text-white font-black h-12 px-6 rounded-xl">
+             <UserPlus className="mr-2 h-5 w-5" /> {lang === 'en' ? 'Provision Merchant' : 'ကုန်သည်အသစ်ဖွင့်ရန်'}
+          </Button>
+          <Button onClick={toggleLang} className="bg-white/5 border border-white/10 text-white h-12 px-6 rounded-xl">
+            <Globe className="mr-2 h-4 w-4" /> {lang === 'en' ? "မြန်မာစာ" : "English"}
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Merchants</CardTitle>
-            <Store className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{mockMerchants.length}</div>
-            <p className="text-xs text-muted-foreground">
-              +2 new this month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Merchants</CardTitle>
-            <Store className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {mockMerchants.filter(m => m.status === 'active').length}
+      {view === 'list' ? (
+        <div className="space-y-6">
+          {/* Search & Filters */}
+          <div className="flex gap-4 items-center bg-[#05080F] p-6 rounded-2xl border border-white/5">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+              <input className="w-full bg-[#0B101B] border border-white/10 rounded-xl h-12 pl-12 pr-6 text-sm" placeholder={lang === 'en' ? "Search Merchant ID or Business Name..." : "ကုန်သည် အိုင်ဒီ (သို့) အမည်ဖြင့် ရှာဖွေရန်..."} />
             </div>
-            <p className="text-xs text-muted-foreground">
-              {Math.round((mockMerchants.filter(m => m.status === 'active').length / mockMerchants.length) * 100)}% of total
-            </p>
-          </CardContent>
-        </Card>
+            <Button variant="outline" className="h-12 border-white/10 text-slate-400"><Filter className="mr-2 h-4 w-4"/> {lang === 'en' ? 'Filters' : 'စစ်ထုတ်ရန်'}</Button>
+          </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {mockMerchants.reduce((sum, m) => sum + m.totalRevenue, 0).toLocaleString()} MMK
+          {/* Merchant Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {merchantRegistry.map((m) => (
+              <Card key={m.id} className="bg-[#05080F] border-none ring-1 ring-white/5 rounded-[2.5rem] overflow-hidden group hover:ring-sky-500/50 transition-all duration-300">
+                <CardContent className="p-8 space-y-6">
+                  <div className="flex justify-between items-start">
+                    <div className="p-3 bg-white/5 rounded-xl"><Package className="h-6 w-6 text-sky-400" /></div>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${m.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                      {m.status}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white group-hover:text-sky-400 transition-colors">{m.name}</h3>
+                    <p className="text-slate-500 font-mono text-xs mt-1 uppercase tracking-widest">{m.id} • {m.type}</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-400 text-sm">
+                    <MapPin className="h-4 w-4" /> {m.city}
+                  </div>
+                  <div className="pt-6 border-t border-white/5 flex gap-2">
+                    <Button variant="ghost" className="flex-1 text-xs font-bold text-slate-500 hover:text-white uppercase tracking-widest">
+                       {lang === 'en' ? 'Edit Profile' : 'ပြင်ဆင်ရန်'}
+                    </Button>
+                    <Button className="flex-1 bg-white/5 hover:bg-sky-600 text-sky-400 hover:text-white font-black text-xs h-10 rounded-xl transition-all">
+                       {lang === 'en' ? 'Launch Portal' : 'ပေါ်တယ်ဖွင့်ရန်'} <ExternalLink className="ml-2 h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ) : (
+        /* Merchant Onboarding Form (Provisioning) */
+        <Card className="bg-[#05080F] border-none ring-1 ring-white/5 rounded-[3rem] p-12 max-w-4xl mx-auto">
+          <h2 className="text-2xl font-black text-white mb-8 flex items-center gap-4">
+            <ShieldCheck className="text-emerald-500 h-8 w-8"/> {lang === 'en' ? 'New Merchant Provisioning' : 'ကုန်သည်အသစ် မှတ်ပုံတင်ခြင်း'}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{lang === 'en' ? 'Business Legal Name' : 'လုပ်ငန်းအမည်'}</label>
+              <input className="w-full bg-[#0B101B] border border-white/10 rounded-2xl h-14 px-6 text-white focus:border-sky-500 outline-none" placeholder="e.g. Britium Wholesale" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              +12% from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('merchant.toRefund')}</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {mockMerchants.reduce((sum, m) => sum + m.toRefund, 0).toLocaleString()} MMK
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{lang === 'en' ? 'Region / Hub' : 'ဒေသ / ဗဟို'}</label>
+              <select className="w-full bg-[#0B101B] border border-white/10 rounded-2xl h-14 px-6 text-white outline-none">
+                <option>Yangon Hub</option>
+                <option>Mandalay Hub</option>
+                <option>Nay Pyi Taw Hub</option>
+              </select>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Pending refunds
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="list" className="flex items-center gap-2">
-            <Store className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('merchant.list')}</span>
-          </TabsTrigger>
-          <TabsTrigger value="receipts" className="flex items-center gap-2">
-            <Receipt className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('merchant.receipts')}</span>
-          </TabsTrigger>
-          <TabsTrigger value="financial" className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('merchant.financialCenter')}</span>
-          </TabsTrigger>
-          <TabsTrigger value="invoicing" className="flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('merchant.invoiceScheduling')}</span>
-          </TabsTrigger>
-          <TabsTrigger value="accounts" className="flex items-center gap-2">
-            <CreditCard className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('merchant.bankAccountList')}</span>
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="list" className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder={t('form.search') + ' merchants...'}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Filter className="w-4 h-4 mr-2" />
-                Filter
-              </Button>
-              <Button variant="outline" size="sm">
-                <Download className="w-4 h-4 mr-2" />
-                Export
+            <div className="md:col-span-2 pt-8">
+              <Button onClick={() => setView('list')} className="w-full bg-sky-600 hover:bg-sky-500 text-white font-black h-16 rounded-2xl text-lg shadow-xl shadow-sky-900/20 uppercase tracking-widest">
+                {lang === 'en' ? 'Verify & Create Merchant Account' : 'စစ်ဆေးပြီး အကောင့်ဖွင့်မည်'}
               </Button>
             </div>
           </div>
-
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t('merchant.merchantId')}</TableHead>
-                    <TableHead>{t('merchant.name')}</TableHead>
-                    <TableHead>{t('merchant.phone')}</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>{t('merchant.activeWays')}</TableHead>
-                    <TableHead>{t('merchant.completedWays')}</TableHead>
-                    <TableHead>{t('merchant.toRefund')}</TableHead>
-                    <TableHead>{t('merchant.priceProfile')}</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredMerchants.map((merchant) => (
-                    <TableRow key={merchant.id}>
-                      <TableCell className="font-medium">{merchant.merchantId}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{merchant.name}</div>
-                          <div className="text-sm text-muted-foreground flex items-center">
-                            <MapPin className="w-3 h-3 mr-1" />
-                            {merchant.address}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <Phone className="w-3 h-3 mr-1" />
-                          {merchant.phone}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <Mail className="w-3 h-3 mr-1" />
-                          {merchant.email}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{merchant.activeWays}</Badge>
-                      </TableCell>
-                      <TableCell>{merchant.completedWays}</TableCell>
-                      <TableCell className="text-red-600 font-medium">
-                        {merchant.toRefund.toLocaleString()} MMK
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{merchant.priceProfile}</Badge>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(merchant.status)}</TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="w-4 h-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Edit className="w-4 h-4 mr-2" />
-                              {t('form.edit')}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Receipt className="w-4 h-4 mr-2" />
-                              View Receipts
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <DollarSign className="w-4 h-4 mr-2" />
-                              Financial Details
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="receipts">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('merchant.receipts')}</CardTitle>
-              <CardDescription>
-                View and manage merchant receipts and payment records
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Receipts management interface will be implemented here.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="financial">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('merchant.financialCenter')}</CardTitle>
-              <CardDescription>
-                Merchant financial overview and management
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Financial center interface will be implemented here.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="invoicing">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('merchant.invoiceScheduling')}</CardTitle>
-              <CardDescription>
-                Schedule and manage merchant invoices
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Invoice scheduling interface will be implemented here.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="accounts">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('merchant.bankAccountList')}</CardTitle>
-              <CardDescription>
-                Manage merchant bank accounts and payment methods
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Bank account management interface will be implemented here.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </Card>
+      )}
     </div>
   );
 }

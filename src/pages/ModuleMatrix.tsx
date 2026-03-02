@@ -30,7 +30,7 @@ export default function ModuleMatrix() {
       bg: "bg-amber-500/10",
       modules: [
         { name: "HQ Warehouse (Shipments)", path: "/admin/shipments", icon: Warehouse },
-        { name: "Branch Office Operations", path: "/admin/branch", icon: MapPin },
+        { name: "Office Branch Operations", path: "/admin/branch", icon: MapPin },
         { name: "Fleet Command", path: "/admin/fleet", icon: Truck },
         { name: "Supervisor Desk", path: "/admin/supervisor", icon: Eye },
       ]

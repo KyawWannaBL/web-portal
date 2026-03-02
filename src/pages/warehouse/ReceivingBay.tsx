@@ -1,352 +1,79 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  CheckCircle2, 
-  AlertCircle, 
-  QrCode, 
-  MapPin, 
-  Package, 
-  Camera, 
-  Info,
-  Check,
-  X,
-  ChevronRight
-} from 'lucide-react';
-import { SHIPMENT_STATUS, Shipment, ShipmentStatus } from '@/lib/index';
-import { useAuth } from '@/hooks/useAuth';
+import { useLanguageContext } from '@/lib/LanguageContext';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { toast } from 'sonner';
+import { 
+  QrCode, ShieldCheck, Camera, 
+  CheckCircle2, Globe, ArrowLeft, 
+  Search, Package, AlertCircle 
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import QRScanner from '@/components/QRScanner';
-import StatusBadge from '@/components/StatusBadge';
 
-const ReceivingBay: React.FC = () => {
-  const { user, legacyUser } = useAuth();
-  const [isLocationVerified, setIsLocationVerified] = useState(false);
-  const [scanningMode, setScanningMode] = useState<'location' | 'parcel' | null>(null);
-  const [currentShipment, setCurrentShipment] = useState<Shipment | null>(null);
-  const [inspectionData, setInspectionData] = useState({
-    piecesMatch: true,
-    conditionMatch: true,
-    notes: '',
-  });
-
-  // Mock data for demo purposes
-  const mockShipments: Record<string, Shipment> = {
-    'AWB123456': {
-      id: 'shp_1',
-      awb: 'AWB123456',
-      tamperTagId: 'TT-000451',
-      status: 'LABEL_APPLIED_VERIFIED',
-      pieces: 2,
-      type: 'box',
-      condition: 'OK',
-      cod: { required: true, amount: 1500 },
-      destinationTownship: 'Downtown',
-      photos: [
-        'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=400',
-        'https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?auto=format&fit=crop&q=80&w=400',
-        'https://images.unsplash.com/photo-1595246140625-573b715d11dc?auto=format&fit=crop&q=80&w=400'
-      ],
-      riderId: 'rdr_001',
-      createdAt: '2026-02-11T10:00:00Z',
-      labelPrintedCount: 1,
-    }
-  };
-
-  const handleLocationScan = (code: string) => {
-    if (code === 'WH_RECEIVING_01') {
-      setIsLocationVerified(true);
-      setScanningMode(null);
-      toast.success('Location verified: Receiving Bay 01');
-    } else {
-      toast.error('Invalid location QR for this operation');
-    }
-  };
-
-  const handleParcelScan = (code: string) => {
-    const shipment = mockShipments[code] || Object.values(mockShipments).find(s => s.tamperTagId === code);
-    
-    if (!shipment) {
-      toast.error('Shipment not found in system');
-      return;
-    }
-
-    if (shipment.status !== 'LABEL_APPLIED_VERIFIED' && shipment.status !== 'ARRIVED_WAREHOUSE_GATE') {
-      toast.error(`Invalid Status: Label must be verified before receiving (Current: ${shipment.status})`);
-      return;
-    }
-
-    setCurrentShipment(shipment);
-    setScanningMode(null);
-    toast.success(`Shipment ${shipment.awb || shipment.tamperTagId} loaded for inspection`);
-  };
-
-  const handleConfirmReceived = () => {
-    if (!currentShipment) return;
-
-    toast.success('Shipment successfully received and verified');
-    setCurrentShipment(null);
-    setInspectionData({ piecesMatch: true, conditionMatch: true, notes: '' });
-  };
-
-  if (!isLocationVerified) {
-    return (
-      <div className="container mx-auto p-4 max-w-2xl">
-        <Card className="card-modern overflow-hidden">
-          <div className="h-2 bg-primary" />
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-primary" />
-              Step 1: Verify Location
-            </CardTitle>
-            <CardDescription>
-              Scan the Warehouse Receiving Bay QR to begin intake operations.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center py-10">
-            {scanningMode === 'location' ? (
-              <div className="w-full space-y-4">
-                <QRScanner onScan={handleLocationScan} expectedType="LOCATION" />
-                <Button variant="ghost" className="w-full" onClick={() => setScanningMode(null)}>
-                  Cancel Scan
-                </Button>
-              </div>
-            ) : (
-              <Button 
-                size="lg" 
-                className="h-32 w-32 rounded-full btn-modern flex flex-col gap-2"
-                onClick={() => setScanningMode('location')}
-              >
-                <QrCode className="w-10 h-10" />
-                <span>Scan QR</span>
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+export default function ReceivingBay() {
+  const { t, language } = useLanguageContext();
+  const navigate = useNavigate();
+  const [isScanning, setIsScanning] = useState(false);
 
   return (
-    <div className="container mx-auto p-4 space-y-6 max-w-5xl">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Warehouse Receiving</h1>
-          <div className="flex items-center gap-2 text-muted-foreground mt-1">
-            <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-200">
-              <CheckCircle2 className="w-3 h-3 mr-1" /> Verified: Receiving Bay 01
-            </Badge>
-            <span className="text-xs">| Staff: {legacyUser?.name}</span>
+    <div className="p-10 space-y-10 bg-[#0B101B] min-h-screen text-slate-300">
+      <div className="flex justify-between items-center bg-[#05080F] p-10 rounded-[3rem] border border-white/5">
+        <div className="flex items-center gap-6">
+          <Button onClick={() => navigate(-1)} variant="ghost" className="p-0 hover:bg-transparent text-slate-500"><ArrowLeft size={32}/></Button>
+          <div>
+            <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter">
+              {language === 'en' ? 'Inbound Bay' : 'ပါဆယ်လက်ခံရေးနေရာ'}
+            </h1>
+            <p className="text-emerald-500 font-mono text-[10px] mt-1 uppercase tracking-widest italic">SEC-01_TAMPER_PROTOCOL_ACTIVE</p>
           </div>
         </div>
-        <Button 
-          variant="outline" 
-          className="btn-modern"
-          onClick={() => setScanningMode('parcel')}
-          disabled={!!scanningMode}
-        >
-          <QrCode className="w-4 h-4 mr-2" />
-          Scan Next Parcel
+        <Button variant="outline" className="border-white/10 text-white h-12 px-6 rounded-xl">
+           <Globe className="mr-2 h-4 w-4" /> {language === 'en' ? "MY" : "EN"}
         </Button>
-      </header>
+      </div>
 
-      {scanningMode === 'parcel' && (
-        <Card className="card-modern border-primary/50 bg-primary/5">
-          <CardContent className="p-6">
-            <div className="max-w-md mx-auto space-y-4">
-              <h3 className="text-center font-medium">Scan AWB or Tamper Tag</h3>
-              <QRScanner onScan={handleParcelScan} expectedType="AWB" />
-              <Button variant="ghost" className="w-full" onClick={() => setScanningMode(null)}>
-                Cancel
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <Card className="lg:col-span-7 bg-[#05080F] border-none ring-1 ring-white/5 rounded-[3rem] p-12 flex flex-col items-center justify-center text-center space-y-10">
+          {!isScanning ? (
+            <>
+              <div className="p-10 border-2 border-dashed border-white/5 rounded-[3rem] opacity-20">
+                <QrCode size={120} className="text-white" />
+              </div>
+              <div className="space-y-4">
+                <h2 className="text-2xl font-black text-white uppercase">{language === 'en' ? 'Awaiting Scan' : 'စကင်ဖတ်ရန် အသင့်ဖြစ်သည်'}</h2>
+                <p className="text-sm text-slate-500 italic max-w-sm">{language === 'en' ? 'Scan the Merchant AWB or Tamper Tag to verify inbound inventory.' : 'ဂိုဒေါင်အတွင်းသို့သွင်းရန် AWB သို့မဟုတ် Tamper Tag ကို စကင်ဖတ်ပါ။'}</p>
+              </div>
+              <Button onClick={() => setIsScanning(true)} className="h-16 w-full max-w-sm bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl text-lg uppercase shadow-xl shadow-emerald-900/40">
+                {language === 'en' ? 'Open Secure Scanner' : 'စကင်ဖတ်မည်'}
               </Button>
+            </>
+          ) : (
+            <div className="w-full max-w-md rounded-[3rem] overflow-hidden border-4 border-emerald-500/50 shadow-2xl">
+               <QRScanner onScan={() => setIsScanning(false)} expectedType="AWB" />
+               <Button onClick={() => setIsScanning(false)} variant="ghost" className="w-full h-14 text-slate-500 font-black">CANCEL</Button>
             </div>
-          </CardContent>
+          )}
         </Card>
-      )}
 
-      {currentShipment ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Inspection Controls */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="card-modern">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Shipment Verification</CardTitle>
-                  <CardDescription>Compare physical parcel with original pickup data</CardDescription>
-                </div>
-                <StatusBadge status={currentShipment.status} />
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground uppercase">AWB Number</p>
-                    <p className="font-mono font-medium">{currentShipment.awb || 'N/A'}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground uppercase">Tamper Tag</p>
-                    <p className="font-mono font-medium">{currentShipment.tamperTagId}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground uppercase">Pieces</p>
-                    <p className="font-medium">{currentShipment.pieces} Units</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground uppercase">Type</p>
-                    <Badge variant="secondary" className="capitalize">{currentShipment.type}</Badge>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-4">
-                  <h4 className="font-medium flex items-center gap-2">
-                    <Camera className="w-4 h-4" />
-                    Pickup Evidence (Photos)
-                  </h4>
-                  <div className="grid grid-cols-3 gap-2">
-                    {currentShipment.photos.map((url, idx) => (
-                      <div key={idx} className="aspect-square rounded-md overflow-hidden border bg-muted">
-                        <img src={url} alt={`Pickup ${idx + 1}`} className="w-full h-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground italic">
-                    * Ensure Tamper Tag is intact and matching the photo above.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-modern">
-              <CardHeader>
-                <CardTitle>Inspection Checklist</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="space-y-0.5">
-                    <p className="font-medium">Pieces Count Verified</p>
-                    <p className="text-sm text-muted-foreground">Physical count matches system record ({currentShipment.pieces})</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant={inspectionData.piecesMatch ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setInspectionData(prev => ({ ...prev, piecesMatch: true }))}
-                    >
-                      <Check className="w-4 h-4 mr-1" /> Yes
-                    </Button>
-                    <Button 
-                      variant={!inspectionData.piecesMatch ? "destructive" : "outline"}
-                      size="sm"
-                      onClick={() => setInspectionData(prev => ({ ...prev, piecesMatch: false }))}
-                    >
-                      <X className="w-4 h-4 mr-1" /> No
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="space-y-0.5">
-                    <p className="font-medium">Condition Assessment</p>
-                    <p className="text-sm text-muted-foreground">No new damage found compared to pickup</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant={inspectionData.conditionMatch ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setInspectionData(prev => ({ ...prev, conditionMatch: true }))}
-                    >
-                      <Check className="w-4 h-4 mr-1" /> OK
-                    </Button>
-                    <Button 
-                      variant={!inspectionData.conditionMatch ? "destructive" : "outline"}
-                      size="sm"
-                      onClick={() => setInspectionData(prev => ({ ...prev, conditionMatch: false }))}
-                    >
-                      <AlertCircle className="w-4 h-4 mr-1" /> Damage
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Internal Notes / Exceptions</Label>
-                  <Input 
-                    id="notes" 
-                    placeholder="Optional: add receiving details..." 
-                    value={inspectionData.notes}
-                    onChange={(e) => setInspectionData(prev => ({ ...prev, notes: e.target.value }))}
-                  />
-                </div>
-              </CardContent>
-              <CardFooter className="bg-muted/30 flex justify-end gap-3">
-                <Button variant="ghost" onClick={() => setCurrentShipment(null)}>Cancel</Button>
-                <Button 
-                  className="btn-modern bg-primary" 
-                  onClick={handleConfirmReceived}
-                >
-                  Confirm Received
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
-
-          {/* Context Sidebar */}
-          <div className="space-y-6">
-            <Card className="card-modern">
-              <CardHeader>
-                <CardTitle className="text-sm">Recipient Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground uppercase">Destination</p>
-                  <p className="font-medium">{currentShipment.destinationTownship}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground uppercase">COD Status</p>
-                  <Badge variant={currentShipment.cod.required ? "destructive" : "secondary"}>
-                    {currentShipment.cod.required ? `Collect: $${currentShipment.cod.amount}` : 'No COD'}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-modern border-orange-200 bg-orange-50/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2 text-orange-700">
-                  <Info className="w-4 h-4" />
-                  Security Rules
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-xs text-orange-800 space-y-2">
-                <p>• Label must be <strong>Activated</strong> before receiving.</p>
-                <p>• Tamper Tag must be physically present and untorn.</p>
-                <p>• Any damage found must be photographed before confirming.</p>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="lg:col-span-5 space-y-8">
+           <Card className="bg-[#05080F] border-none ring-1 ring-white/5 rounded-[2.5rem] p-8 space-y-6">
+              <h3 className="text-white font-black uppercase italic border-b border-white/5 pb-4 flex items-center gap-3">
+                 <ShieldCheck className="text-emerald-500" /> {language === 'en' ? 'Integrity Rules' : 'လုံခြုံရေး စည်းမျဉ်းများ'}
+              </h3>
+              <div className="space-y-4 text-xs text-slate-400 italic">
+                 <p className="flex gap-3"><CheckCircle2 size={14} className="text-emerald-500 shrink-0"/> {language === 'en' ? 'AWB must be activated by merchant.' : 'ကုန်သည်မှ AWB အား အသက်သွင်းပြီးဖြစ်ရမည်။'}</p>
+                 <p className="flex gap-3"><CheckCircle2 size={14} className="text-emerald-500 shrink-0"/> {language === 'en' ? 'Tamper seal must be untorn.' : 'လုံခြုံရေးတံဆိပ်သည် ပျက်စီးမှုမရှိစေရ။'}</p>
+              </div>
+           </Card>
+           <Card className="bg-rose-500/5 border-none ring-1 ring-rose-500/20 rounded-[2.5rem] p-8 flex items-center gap-6">
+              <AlertCircle className="text-rose-500 h-10 w-10 shrink-0" />
+              <div>
+                 <p className="text-white font-black text-sm uppercase italic">{language === 'en' ? 'Found Damage?' : 'ပျက်စီးမှုတွေ့ရှိသလား?'}</p>
+                 <p className="text-[10px] text-rose-500/80 font-mono uppercase mt-1">{language === 'en' ? 'Trigger Incident Protocol' : 'ချက်ချင်း တိုင်ကြားရန်'}</p>
+              </div>
+           </Card>
         </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-20 bg-muted/20 border-2 border-dashed rounded-xl">
-          <Package className="w-16 h-16 text-muted-foreground/40 mb-4" />
-          <h2 className="text-xl font-medium text-muted-foreground">Ready for next parcel</h2>
-          <p className="text-sm text-muted-foreground mt-2">Scan an AWB QR or Tamper Tag to begin inspection</p>
-          <Button 
-            className="mt-6 btn-modern" 
-            onClick={() => setScanningMode('parcel')}
-          >
-            Start Scanning
-          </Button>
-        </div>
-      )}
+      </div>
     </div>
   );
-};
-
-export default ReceivingBay;
+}

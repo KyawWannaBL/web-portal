@@ -1,253 +1,129 @@
 import React, { useState } from 'react';
-import { 
-  Search, 
-  Package, 
-  MapPin, 
-  Clock, 
-  CheckCircle,
-  Truck,
-  Home
-} from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { 
+  Search, Package, Truck, CheckCircle2, 
+  Map as MapIcon, Globe, Navigation, 
+  Clock, ShieldCheck, Headphones, ArrowRight 
+} from 'lucide-react';
 
 export default function PublicTracking() {
+  const { lang, toggleLang } = useLanguage();
   const [trackingId, setTrackingId] = useState('');
-  const [trackingResult, setTrackingResult] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isFound, setIsFound] = useState(false);
 
-  const handleTrack = async () => {
-    if (!trackingId.trim()) return;
-    
-    setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      // Mock tracking data
-      setTrackingResult({
-        id: trackingId,
-        status: 'In Transit',
-        statusColor: 'bg-blue-100 text-blue-800',
-        lastUpdated: 'Just now',
-        from: 'Yangon',
-        to: 'Mandalay',
-        estimatedDelivery: 'Tomorrow, 2:00 PM',
-        timeline: [
-          {
-            status: 'Order Placed',
-            location: 'Yangon',
-            time: 'Oct 24, 2026 - 9:00 AM',
-            completed: true,
-            icon: CheckCircle,
-          },
-          {
-            status: 'Picked Up',
-            location: 'East Dagon Hub',
-            time: 'Oct 24, 2026 - 11:30 AM',
-            completed: true,
-            icon: Package,
-          },
-          {
-            status: 'In Transit',
-            location: 'Highway Express',
-            time: 'Oct 24, 2026 - 2:15 PM',
-            completed: true,
-            icon: Truck,
-          },
-          {
-            status: 'Out for Delivery',
-            location: 'Mandalay Hub',
-            time: 'Expected: Oct 25, 2026 - 1:00 PM',
-            completed: false,
-            icon: MapPin,
-          },
-          {
-            status: 'Delivered',
-            location: 'Destination',
-            time: 'Expected: Oct 25, 2026 - 2:00 PM',
-            completed: false,
-            icon: Home,
-          },
-        ],
-      });
-      setIsLoading(false);
-    }, 1000);
+  // High-Fidelity Milestone Logic (Bilingual)
+  const milestones = [
+    { statusEn: 'DELIVERED', statusMy: 'ပို့ဆောင်ပြီး', loc: 'Recipient Home', time: 'Today 14:30', done: true },
+    { statusEn: 'OUT_FOR_DELIVERY', statusMy: 'ပို့ဆောင်ရန်ထွက်ခွာပြီ', loc: 'Yangon Hub', time: 'Today 09:00', done: true },
+    { statusEn: 'IN_TRANSIT', statusMy: 'လမ်းခရီးတွင်', loc: 'Expressway', time: 'Yesterday 18:00', done: true },
+    { statusEn: 'ORDER_PLACED', statusMy: 'အမှာစာလက်ခံရရှိသည်', loc: 'Merchant Warehouse', time: 'Yesterday 10:00', done: true }
+  ];
+
+  const handleTrack = (e: React.FormEvent) => {
+    e.preventDefault();
+    if(trackingId.length > 5) setIsFound(true);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Track & Trace</h1>
-          <p className="text-xl text-gray-600">Real-time status updates for your shipments.</p>
+    <div className="min-h-screen bg-[#0B101B] text-slate-300 font-sans">
+      {/* Dynamic Navbar */}
+      <nav className="p-6 flex justify-between items-center bg-[#05080F]/50 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-sky-500 rounded-lg flex items-center justify-center">
+            <Package className="text-white h-5 w-5" />
+          </div>
+          <span className="font-black text-white uppercase italic tracking-tighter">Britium <span className="text-sky-500 text-xs">Express</span></span>
         </div>
+        <Button onClick={toggleLang} variant="outline" className="border-white/10 text-xs rounded-full h-10 px-6">
+           <Globe className="mr-2 h-4 w-4" /> {lang === 'en' ? "မြန်မာစာ" : "English"}
+        </Button>
+      </nav>
 
-        {/* Tracking Form */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="text-center">Track Your Shipment</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <div className="flex-1">
-                <Input
-                  placeholder="Enter tracking number (e.g., BE-89744)"
-                  value={trackingId}
-                  onChange={(e) => setTrackingId(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleTrack()}
-                />
-              </div>
-              <Button 
-                onClick={handleTrack} 
-                disabled={isLoading || !trackingId.trim()}
-                className="bg-primary hover:bg-primary/90"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Tracking...
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-4 h-4 mr-2" />
-                    TRACK
-                  </>
-                )}
+      <div className="max-w-6xl mx-auto p-10 space-y-12">
+        {/* Hero Search Section */}
+        <section className="text-center space-y-8">
+           <h1 className="text-5xl font-black text-white uppercase italic tracking-tighter">
+              {lang === 'en' ? 'Track Your Cargo' : 'ကုန်စည် ခြေရာခံခြင်း'}
+           </h1>
+           <form onSubmit={handleTrack} className="max-w-2xl mx-auto relative group">
+              <div className="absolute inset-0 bg-sky-500/20 blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
+              <input 
+                className="w-full h-20 bg-[#05080F] border border-white/10 rounded-full px-10 text-xl text-white outline-none focus:border-sky-500 transition-all relative"
+                placeholder={lang === 'en' ? "Enter AWB / Tracking ID..." : "ခြေရာခံနံပါတ် ရိုက်ထည့်ပါ..."}
+                value={trackingId}
+                onChange={(e) => setTrackingId(e.target.value)}
+              />
+              <Button type="submit" className="absolute right-3 top-3 h-14 px-10 bg-sky-600 hover:bg-sky-500 text-white font-black rounded-full uppercase tracking-widest">
+                {lang === 'en' ? 'Track' : 'ရှာမည်'}
               </Button>
-            </div>
-          </CardContent>
-        </Card>
+           </form>
+        </section>
 
-        {/* Tracking Results */}
-        {trackingResult && (
-          <div className="space-y-6">
-            {/* Status Overview */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        {isFound && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 animate-in fade-in slide-in-from-bottom-10 duration-700">
+            {/* Milestone Timeline (ခြေရာခံမှု အဆင့်ဆင့်) */}
+            <Card className="lg:col-span-1 bg-[#05080F] border-none ring-1 ring-white/5 rounded-[3rem] p-10 space-y-8 h-fit">
+               <div className="flex justify-between items-center border-b border-white/5 pb-6">
                   <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <Badge className={trackingResult.statusColor}>
-                        {trackingResult.status}
-                      </Badge>
-                      <span className="text-sm text-gray-500">ID: {trackingResult.id}</span>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      <Clock className="w-4 h-4 inline mr-1" />
-                      Last Updated: {trackingResult.lastUpdated}
-                    </p>
+                    <p className="text-[10px] font-black text-sky-500 uppercase font-mono">{trackingId}</p>
+                    <h2 className="text-xl font-bold text-white uppercase italic">{lang === 'en' ? 'Status: Delivered' : 'အခြေအနေ: ပို့ဆောင်ပြီး'}</h2>
                   </div>
-                  
-                  <div className="flex items-center gap-8">
-                    <div className="text-center">
-                      <p className="text-sm text-gray-500">From</p>
-                      <p className="font-semibold">{trackingResult.from}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm text-gray-500">To</p>
-                      <p className="font-semibold">{trackingResult.to}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {trackingResult.estimatedDelivery && (
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      <MapPin className="w-4 h-4 inline mr-1" />
-                      Estimated Delivery: {trackingResult.estimatedDelivery}
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Timeline */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Shipment Timeline</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {trackingResult.timeline.map((event: any, index: number) => (
-                    <div key={index} className="flex items-start gap-4">
-                      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                        event.completed 
-                          ? 'bg-green-100 text-green-600' 
-                          : 'bg-gray-100 text-gray-400'
-                      }`}>
-                        <event.icon className="w-5 h-5" />
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <h3 className={`text-sm font-medium ${
-                            event.completed ? 'text-gray-900' : 'text-gray-500'
-                          }`}>
-                            {event.status}
-                          </h3>
-                          <span className={`text-xs ${
-                            event.completed ? 'text-gray-600' : 'text-gray-400'
-                          }`}>
-                            {event.time}
-                          </span>
-                        </div>
-                        <p className={`text-sm ${
-                          event.completed ? 'text-gray-600' : 'text-gray-400'
-                        }`}>
-                          {event.location}
-                        </p>
-                      </div>
+                  <CheckCircle2 className="text-emerald-500 h-8 w-8" />
+               </div>
+               
+               <div className="space-y-8 relative">
+                  <div className="absolute left-[11px] top-2 bottom-10 w-0.5 bg-white/5" />
+                  {milestones.map((m, i) => (
+                    <div key={i} className="flex gap-6 relative">
+                       <div className={`w-6 h-6 rounded-full border-4 border-[#05080F] z-10 ${m.done ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-slate-800'}`} />
+                       <div className="flex-1">
+                          <p className={`font-black text-sm ${m.done ? 'text-white' : 'text-slate-600'}`}>{lang === 'en' ? m.statusEn : m.statusMy}</p>
+                          <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase">{m.loc} • {m.time}</p>
+                       </div>
                     </div>
                   ))}
-                </div>
-              </CardContent>
+               </div>
             </Card>
 
-            {/* Additional Info */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Need Help?</h3>
-                    <p className="text-sm text-gray-600 mb-3">
-                      Contact our customer service for any questions about your shipment.
-                    </p>
-                    <div className="space-y-1 text-sm">
-                      <p className="text-gray-600">📞 +95 9 897 4477 44</p>
-                      <p className="text-gray-600">✉️ info@britiumexpress.com</p>
-                    </div>
+            {/* Map & Security Information (မြေပုံနှင့် လုံခြုံရေး) */}
+            <div className="lg:col-span-2 space-y-8">
+               <Card className="bg-[#05080F] border-none ring-1 ring-white/5 rounded-[3rem] overflow-hidden min-h-[400px] relative">
+                  <div className="absolute inset-0 bg-[#0B101B] flex items-center justify-center opacity-40">
+                     <Navigation size={60} className="text-sky-500 animate-pulse rotate-45" />
                   </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Business Hours</h3>
-                    <div className="space-y-1 text-sm text-gray-600">
-                      <p>Monday - Saturday: 9:00 AM - 5:30 PM</p>
-                      <p>Sunday: Closed</p>
-                    </div>
+                  <div className="absolute top-6 left-6 bg-[#05080F]/90 backdrop-blur-xl p-4 rounded-2xl border border-white/5">
+                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Live Delivery Hub</p>
+                     <p className="text-white font-bold text-sm">North Okkalapa Sector</p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+               </Card>
+               
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card className="bg-white/5 border-none p-8 rounded-[2.5rem] flex items-center gap-6">
+                     <ShieldCheck className="text-emerald-500 h-10 w-10 shrink-0" />
+                     <div>
+                        <p className="text-white font-black text-sm uppercase italic">Verified Protection</p>
+                        <p className="text-[10px] text-slate-500 font-mono uppercase tracking-widest mt-1">SEC-01 Tamper Tag Active</p>
+                     </div>
+                  </Card>
+                  <Card onClick={() => navigate('/support')} className="bg-sky-500/5 border-none p-8 rounded-[2.5rem] flex items-center gap-6 cursor-pointer hover:bg-sky-500/10 transition-all">
+                     <Headphones className="text-sky-500 h-10 w-10 shrink-0" />
+                     <div>
+                        <p className="text-white font-black text-sm uppercase italic">Need Assistance?</p>
+                        <p className="text-[10px] text-sky-500 font-mono uppercase tracking-widest mt-1">Direct Help Line</p>
+                     </div>
+                  </Card>
+               </div>
+            </div>
           </div>
         )}
-
-        {/* No Results */}
-        {trackingId && !trackingResult && !isLoading && (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Results Found</h3>
-              <p className="text-gray-600">
-                We couldn't find any shipment with tracking ID "{trackingId}". 
-                Please check the number and try again.
-              </p>
-            </CardContent>
-          </Card>
-        )}
       </div>
+
+      {/* Public Footer */}
+      <footer className="p-10 border-t border-white/5 text-center">
+         <p className="text-[10px] font-mono text-slate-600 uppercase tracking-[0.4em]">© 2026 Britium Express • Yangon_Mandalay_Naypyitaw</p>
+      </footer>
     </div>
   );
 }
