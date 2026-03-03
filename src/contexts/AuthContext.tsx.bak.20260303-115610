@@ -22,28 +22,29 @@ type AuthCtx = {
 
 const Ctx = createContext<AuthCtx | null>(null);
 
-function normalizeRole(role?: string | null) {
-  if (!role) return null;
-  const clean = role.trim().toUpperCase();
-  // handle truncated value seen in some DB schemas
-  if (clean === "SUPER_A") return "SUPER_ADMIN";
-  return clean;
+function normRole(v?: string | null) {
+  const s = (v ?? "").trim();
+  return s ? s.toUpperCase() : null;
 }
 
 async function loadProfile(userId: string): Promise<Profile | null> {
-  // Be defensive: permissions might not exist everywhere
-  const trySelect = async (sel: string) =>
-    supabase.from("profiles").select(sel).eq("id", userId).maybeSingle();
-
-  let { data, error } = await trySelect("id, role, must_change_password, permissions");
-  if (error && (error as any).code === "42703") {
-    ({ data, error } = await trySelect("id, role, must_change_password"));
-  }
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, role, must_change_password")
+    .eq("id", userId)
+    .single();
 
   if (error) {
-    console.warn("[AuthContext] loadProfile failed:", { code: (error as any).code, message: error.message });
+    // Enterprise: never swallow silently; helps diagnose RLS / missing profile row.
+    console.warn("[AuthContext] loadProfile failed:", {
+      code: (error as any).code,
+      message: error.message,
+      details: (error as any).details,
+      hint: (error as any).hint,
+    });
     return null;
   }
+
   return data as any;
 }
 
@@ -67,10 +68,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const u = session.user;
     setUser({ id: u.id, email: u.email });
 
+    // Primary source: profiles table (RLS should allow read own row)
     const profile = await loadProfile(u.id);
-    setRole(normalizeRole(profile?.role) || normalizeRole(u?.app_metadata?.role) || normalizeRole(u?.user_metadata?.role));
-    setPermissions(Array.isArray(profile?.permissions) ? (profile!.permissions as any) : []);
-    setMustChangePassword(Boolean(profile?.must_change_password));
+
+    // Fallback source: JWT metadata (useful if profiles read is blocked)
+    const metaRole =
+      normRole(u?.app_metadata?.role) ||
+      normRole(u?.user_metadata?.role) ||
+      null;
+
+    setRole(normRole(profile?.role) || metaRole);
+
+    const perms = profile?.permissions;
+    setPermissions([]); // until you actually add permissions support
+
+    const must =
+      Boolean(profile?.must_change_password) ||
+      Boolean(u?.app_metadata?.must_change_password) ||
+      Boolean(u?.user_metadata?.must_change_password);
+
+    setMustChangePassword(must);
     setLoading(false);
   };
 
@@ -104,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await refresh();
   };
 
-  const value = useMemo<AuthCtx>(
+  const value: AuthCtx = useMemo(
     () => ({
       user,
       role,

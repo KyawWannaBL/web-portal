@@ -1,29 +1,18 @@
 import React, { Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
-
 import AdminLayout from "./components/AdminLayout";
 import Login from "./pages/Login";
-import SignUp from "./pages/SignUp";
-import ForgotPassword from "./pages/ForgotPassword";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
-import AccountControl from "./pages/AccountControl";
-import HRPortal from "./pages/HRPortal";
-
-import AuthCallback from "./pages/AuthCallback";
-import SecurityUpdate from "./pages/SecurityUpdate";
 import Unauthorized from "./pages/Unauthorized";
-
 import { RequireAuth } from "@/routes/RequireAuth";
-import { RequirePasswordRotation } from "@/routes/RequirePasswordRotation";
 import { RequireRole } from "@/routes/RequireRole";
 
 const Loading = () => {
   const { lang } = useLanguage();
   return (
-    <div className="min-h-screen bg-[#05080F] flex flex-col items-center justify-center font-mono space-y-4 text-center">
-      <div className="h-10 w-10 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
-      <div className="text-[10px] text-emerald-500 tracking-widest uppercase animate-pulse">
+    <div className="min-h-screen bg-[#05080F] flex flex-col items-center justify-center font-mono text-emerald-500">
+      <div className="animate-pulse uppercase tracking-widest text-[10px]">
         {lang === 'en' ? 'INITIALIZING L5 SECURE GATEWAY...' : 'L5 လုံခြုံရေးဂိတ်ကို စတင်နေပါသည်...'}
       </div>
     </div>
@@ -36,45 +25,18 @@ export default function App() {
       <Suspense fallback={<Loading />}>
         <Router>
           <Routes>
-            {/* Public Entry Points */}
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-
-            {/* System Policy Enforcement */}
-            <Route path="/security-update" element={<SecurityUpdate />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
-
-            {/* Protected L5 Command Center */}
             <Route element={<RequireAuth />}>
-              <Route element={<RequirePasswordRotation />}>
-                <Route
-                  path="/admin"
-                  element={
-                    <RequireRole
-                      allow={[
-                        "SYS",            // System Overlord clearance
-                        "APP_OWNER",      // Primary MD clearance
-                        "SUPER_ADMIN",    // IT Admin primary clearance
-                        "SUPER_A",        // DEFENSIVE: Fixes truncation in btx_session
-                        "MGR",
-                      ]}
-                    >
-                      <AdminLayout />
-                    </RequireRole>
-                  }
-                >
-                  <Route index element={<Navigate to="dashboard" replace />} />
-                  <Route path="dashboard" element={<SuperAdminDashboard />} />
-                  <Route path="accounts" element={<AccountControl />} />
-                  <Route path="hr" element={<HRPortal />} />
-                </Route>
+              <Route path="/admin" element={
+                <RequireRole allow={["SYS", "APP_OWNER", "SUPER_ADMIN", "SUPER_A", "MGR"]}>
+                  <AdminLayout />
+                </RequireRole>
+              }>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<SuperAdminDashboard />} />
               </Route>
             </Route>
-
-            {/* Routing Defaults */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Router>
