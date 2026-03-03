@@ -36,13 +36,17 @@ export default function App() {
       <Suspense fallback={<Loading />}>
         <Router>
           <Routes>
+            {/* Public Entry Points */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+
+            {/* System Policy Enforcement */}
             <Route path="/security-update" element={<SecurityUpdate />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
+            {/* Protected L5 Command Center */}
             <Route element={<RequireAuth />}>
               <Route element={<RequirePasswordRotation />}>
                 <Route
@@ -50,10 +54,10 @@ export default function App() {
                   element={
                     <RequireRole
                       allow={[
-                        "SYS",            // System Overlord
-                        "APP_OWNER",      // MD Primary Clearance
-                        "SUPER_ADMIN",    // IT Admin Clearance
-                        "SUPER_A",        // Fixes truncation in session logs
+                        "SYS",            // System Overlord clearance
+                        "APP_OWNER",      // Primary MD clearance
+                        "SUPER_ADMIN",    // IT Admin primary clearance
+                        "SUPER_A",        // DEFENSIVE: Fixes truncation in btx_session
                         "OPERATIONS_ADMIN",
                         "FINANCE_ADMIN",
                         "MGR",
@@ -71,6 +75,7 @@ export default function App() {
               </Route>
             </Route>
 
+            {/* Routing Defaults */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
