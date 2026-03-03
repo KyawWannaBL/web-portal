@@ -15,9 +15,17 @@ function ActionCard({ title, desc, to, cta }: { title: string; desc: string; to:
   );
 }
 
+// Define the exact shape of our stats so TypeScript doesn't force them into strings
+type StatsData = {
+  personnel: string | number;
+  activeRiders: string | number;
+  securityEvents: string | number;
+  rotationRequired: string | number;
+};
+
 export default function CommandCenterPage() {
   const { t } = useI18n();
-  const [stats, setStats] = React.useState({ personnel: "-" as string | number, activeRiders: "-" as string | number, securityEvents: "-" as string | number, rotationRequired: "-" as string | number });
+  const [stats, setStats] = React.useState<StatsData>({ personnel: "-", activeRiders: "-", securityEvents: "-", rotationRequired: "-" });
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {

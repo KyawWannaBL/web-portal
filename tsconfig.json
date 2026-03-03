@@ -14,5 +14,12 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src"]
+  "include": [
+    "src/main.tsx",
+    "src/App.tsx",
+    "src/routes/**/*",
+    "src/state/**/*",
+    "src/ui/**/*",
+    "src/views/**/*"
+  ]
 }
