@@ -45,13 +45,13 @@ export default function AdminLayout() {
 
   const menuItems: NavItem[] = useMemo(
     () => [
-      { id: "dash", path: "/admin/dashboard", icon: <LayoutDashboard />, label: { en: "Executive Overview", my: "အမှုဆောင် ခြုံငုံသုံးသပ်ချက်" } },
+      { id: "dashboard", path: "/admin/dashboard", icon: <LayoutDashboard />, label: { en: "Executive Overview", my: "အမှုဆောင် ခြုံငုံသုံးသပ်ချက်" } },
       { id: "approvals", path: "/admin/approvals", icon: <ShieldCheck />, label: { en: "Account Approvals", my: "အကောင့် အတည်ပြုမှုများ" } },
-      { id: "ship", path: "/admin/shipments", icon: <PackageSearch />, label: { en: "Shipment Control", my: "ပို့ဆောင်မှု ထိန်းချုပ်မှု" } },
+      { id: "shipments", path: "/admin/shipments", icon: <PackageSearch />, label: { en: "Shipment Control", my: "ပို့ဆောင်မှု ထိန်းချုပ်မှု" } },
       { id: "fleet", path: "/admin/fleet", icon: <Truck />, label: { en: "Fleet Command", my: "ယာဉ်တပ် စီမံခန့်ခွဲမှု" } },
-      { id: "fin", path: "/admin/omni-finance", icon: <Landmark />, label: { en: "Global Finance", my: "ကမ္ဘာလုံးဆိုင်ရာ ငွေကြေး" } },
-      { id: "map", path: "/admin/live-map", icon: <Map />, label: { en: "Live Telemetry", my: "တိုက်ရိုက် တယ်လီမထရီ" } },
-      { id: "sets", path: "/admin/settings", icon: <Settings />, label: { en: "System Tariffs", my: "စနစ် အခွန်အကောက်" } },
+      { id: "finance", path: "/admin/omni-finance", icon: <Landmark />, label: { en: "Global Finance", my: "ကမ္ဘာလုံးဆိုင်ရာ ငွေကြေး" } },
+      { id: "live-map", path: "/admin/live-map", icon: <Map />, label: { en: "Live Telemetry", my: "တိုက်ရိုက် တယ်လီမထရီ" } },
+      { id: "settings", path: "/admin/settings", icon: <Settings />, label: { en: "System Tariffs", my: "စနစ် အခွန်အကောက်" } },
     ],
     []
   );
@@ -93,6 +93,7 @@ export default function AdminLayout() {
           {menuItems.map((item) => (
             <button
               key={item.id}
+              data-testid={`nav-${item.id}`}
               onClick={() => navigate(item.path)}
               className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all group ${
                 location.pathname === item.path
@@ -115,6 +116,7 @@ export default function AdminLayout() {
         <header className="h-20 bg-[#05080F]/50 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-10 z-10">
           <div className="flex items-center gap-3">
             <button
+              data-testid="btn-prev"
               onClick={() => prevPath && navigate(prevPath)}
               disabled={!prevPath}
               className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
@@ -128,6 +130,7 @@ export default function AdminLayout() {
             </button>
 
             <button
+              data-testid="btn-next"
               onClick={() => nextPath && navigate(nextPath)}
               disabled={!nextPath}
               className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
@@ -147,6 +150,7 @@ export default function AdminLayout() {
             </div>
 
             <button
+              data-testid="btn-lang"
               onClick={toggleLang}
               className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-white transition-all"
             >
@@ -156,6 +160,7 @@ export default function AdminLayout() {
 
             <div className="relative" ref={ref}>
               <button
+                data-testid="btn-account"
                 onClick={() => setOpen((v) => !v)}
                 className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-white transition-all"
               >
@@ -166,14 +171,26 @@ export default function AdminLayout() {
 
               {open && (
                 <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-white/10 bg-[#05080F]/95 backdrop-blur-xl shadow-2xl overflow-hidden">
-                  <button onClick={() => (setOpen(false), navigate("/admin/accounts"))} className="w-full px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5">
+                  <button
+                    data-testid="menu-account-control"
+                    onClick={() => (setOpen(false), navigate("/admin/accounts"))}
+                    className="w-full px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
+                  >
                     {t("Account Control", "အကောင့် ထိန်းချုပ်မှု")}
                   </button>
-                  <button onClick={() => (setOpen(false), navigate("/admin/hr"))} className="w-full px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5">
+                  <button
+                    data-testid="menu-hr-portal"
+                    onClick={() => (setOpen(false), navigate("/admin/hr"))}
+                    className="w-full px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
+                  >
                     {t("HR Portal", "ဝန်ထမ်း ပေါ်တယ်")}
                   </button>
                   <div className="h-px bg-white/10" />
-                  <button onClick={() => (setOpen(false), void signOut())} className="w-full px-4 py-3 text-left text-sm text-rose-300 hover:bg-rose-500/10 flex items-center gap-2">
+                  <button
+                    data-testid="menu-signout"
+                    onClick={() => (setOpen(false), void signOut())}
+                    className="w-full px-4 py-3 text-left text-sm text-rose-300 hover:bg-rose-500/10 flex items-center gap-2"
+                  >
                     <LogOut className="h-4 w-4" />
                     {t("Sign out", "ထွက်ရန်")}
                   </button>
@@ -181,7 +198,11 @@ export default function AdminLayout() {
               )}
             </div>
 
-            <button onClick={() => void signOut()} className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 rounded-xl text-xs font-bold text-rose-200 transition-all">
+            <button
+              data-testid="btn-signout"
+              onClick={() => void signOut()}
+              className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 rounded-xl text-xs font-bold text-rose-200 transition-all"
+            >
               <LogOut className="h-4 w-4" />
               {t("Sign out", "ထွက်ရန်")}
             </button>
