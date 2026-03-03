@@ -21,7 +21,7 @@ import { RequireRole } from "@/routes/RequireRole";
 const Loading = () => {
   const { lang } = useLanguage();
   return (
-    <div className="min-h-screen bg-[#05080F] flex flex-col items-center justify-center font-mono space-y-4">
+    <div className="min-h-screen bg-[#05080F] flex flex-col items-center justify-center font-mono space-y-4 text-center">
       <div className="h-10 w-10 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
       <div className="text-[10px] text-emerald-500 tracking-widest uppercase animate-pulse">
         {lang === 'en' ? 'INITIALIZING L5 SECURE GATEWAY...' : 'L5 လုံခြုံရေးဂိတ်ကို စတင်နေပါသည်...'}
@@ -58,8 +58,6 @@ export default function App() {
                         "APP_OWNER",      // Primary MD clearance
                         "SUPER_ADMIN",    // IT Admin primary clearance
                         "SUPER_A",        // DEFENSIVE: Fixes truncation in btx_session
-                        "OPERATIONS_ADMIN",
-                        "FINANCE_ADMIN",
                         "MGR",
                       ]}
                     >
