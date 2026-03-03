@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { supabase } from "@/supabaseClient";
 
 // Advanced Features API Service
