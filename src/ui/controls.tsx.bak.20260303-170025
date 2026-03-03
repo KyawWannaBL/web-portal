@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Link, type To } from "react-router-dom";
+import { Link } from "react-router-dom";
+import type { AppPath } from "../routes/paths";
 
 export function cx(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -11,7 +12,7 @@ type BtnBase = {
   disabled?: boolean;
 };
 
-type BtnLink = BtnBase & { to: To; onClick?: never };
+type BtnLink = BtnBase & { to: AppPath; onClick?: never };
 type BtnButton = BtnBase & { to?: never; onClick: React.MouseEventHandler<HTMLButtonElement> };
 
 export function AppButton(props: BtnLink | BtnButton) {
@@ -42,4 +43,8 @@ export function AppButton(props: BtnLink | BtnButton) {
       {props.children}
     </button>
   );
+}
+
+export function IconPill(props: { children: React.ReactNode; className?: string }) {
+  return <span className={cx("pill", props.className)}>{props.children}</span>;
 }

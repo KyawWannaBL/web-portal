@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ShieldCheck, Download, Globe, AlertTriangle, Loader2 } from 'lucide-react';
+import { ShieldCheck, Mail, Lock, Download, Globe, AlertTriangle, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAuthError('');
+    setAuthError("");
     setIsLoading(true);
     
     const from = location.state?.from ?? "/admin/dashboard";

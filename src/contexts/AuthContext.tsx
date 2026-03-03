@@ -3,25 +3,17 @@ import { supabase } from "@/supabaseClient";
 import { hasSupabaseEnv, isMockMode } from "@/lib/mode";
 
 type Profile = {
-  id: string;
-  role: string | null;
-  must_change_password: boolean | null;
-  permissions?: string[] | null;
-  full_name?: string | null;
+  id: string; role: string | null; must_change_password: boolean | null;
+  permissions?: string[] | null; full_name?: string | null;
 };
 
 type AuthCtx = {
   user: { id: string; email?: string } | null;
-  displayName: string | null;
-  role: string | null;
-  permissions: string[];
-  mustChangePassword: boolean;
-  isAuthenticated: boolean;
-  loading: boolean;
-  isMock: boolean;
+  displayName: string | null; role: string | null;
+  permissions: string[]; mustChangePassword: boolean;
+  isAuthenticated: boolean; loading: boolean; isMock: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
-  logout: () => Promise<void>;
-  refresh: () => Promise<void>;
+  logout: () => Promise<void>; refresh: () => Promise<void>;
 };
 
 const Ctx = createContext<AuthCtx | null>(null);
@@ -37,7 +29,26 @@ function normalizeRole(role?: string | null) {
 function deriveDisplayName(email?: string | null) {
   const v = String(email ?? "").trim();
   if (!v) return null;
-  return v.split("@")[0]?.trim() || v;
+  const head = v.split("@")[0]?.trim();
+  return head || v;
+}
+
+async function loadProfile(userId: string): Promise<Profile | null> {
+  const trySelect = async (sel: string) => supabase.from("profiles").select(sel).eq("id", userId).maybeSingle();
+  const selects = [
+    "id, role, must_change_password, permissions, full_name",
+    "id, role, must_change_password, permissions",
+    "id, role, must_change_password, full_name",
+    "id, role, must_change_password",
+  ];
+  let lastError: any = null;
+  for (const sel of selects) {
+    const { data, error } = await trySelect(sel);
+    if (!error) return (data as any) ?? null;
+    lastError = error;
+    if ((error as any).code !== "42703") break;
+  }
+  return null;
 }
 
 function readMockSession() {
@@ -48,6 +59,9 @@ function readMockSession() {
     return v?.email ? { email: String(v.email), role: String(v.role ?? "SUPER_ADMIN") } : null;
   } catch { return null; }
 }
+
+function writeMockSession(email: string, role: string) { localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify({ email, role, at: Date.now() })); }
+function clearMockSession() { localStorage.removeItem(MOCK_STORAGE_KEY); }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthCtx["user"]>(null);
@@ -64,6 +78,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setPermissions([]); setMustChangePassword(false); setLoading(false);
   };
 
+  const hydrateSupabase = async (session: any) => {
+    if (!session?.user) return setLoggedOut();
+    const u = session.user;
+    setUser({ id: u.id, email: u.email });
+    const profile = await loadProfile(u.id);
+    setRole(normalizeRole(profile?.role) || normalizeRole(u?.app_metadata?.role) || normalizeRole(u?.user_metadata?.role));
+    setDisplayName(profile?.full_name || u?.user_metadata?.full_name || u?.user_metadata?.name || deriveDisplayName(u?.email));
+    setPermissions(Array.isArray(profile?.permissions) ? (profile!.permissions as any) ?? [] : []);
+    setMustChangePassword(Boolean(profile?.must_change_password));
+    setLoading(false);
+  };
+
   const refresh = async () => {
     setLoading(true);
     if (isMock) {
@@ -72,47 +98,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser({ id: "mock", email: sess.email });
       setDisplayName(deriveDisplayName(sess.email));
       setRole(normalizeRole(sess.role) ?? "SUPER_ADMIN");
-      setLoading(false);
+      setPermissions(["MOCK"]);
+      setMustChangePassword(false); setLoading(false);
       return;
     }
     const { data } = await supabase.auth.getSession();
-    if (!data?.session?.user) return setLoggedOut();
-    
-    const u = data.session.user;
-    setUser({ id: u.id, email: u.email });
-    
-    const { data: profile } = await supabase.from("profiles").select("*").eq("id", u.id).maybeSingle();
-    setRole(normalizeRole(profile?.role) || normalizeRole(u?.app_metadata?.role) || normalizeRole(u?.user_metadata?.role));
-    setDisplayName(profile?.full_name || u?.user_metadata?.full_name || deriveDisplayName(u?.email));
-    setLoading(false);
+    await hydrateSupabase(data?.session);
   };
 
   useEffect(() => {
     void refresh();
     if (isMock) return;
-    const { data } = supabase.auth.onAuthStateChange(() => { void refresh(); });
+    const { data } = supabase.auth.onAuthStateChange((_, session) => { void hydrateSupabase(session); });
     return () => data?.subscription?.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     if (isMock) {
-      localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify({ email, role: "SUPER_ADMIN" }));
-      await refresh();
-      return { success: true, message: "OK" };
+      if (!email.trim()) { setLoading(false); return { success: false, message: "Missing email." }; }
+      writeMockSession(email.trim(), "SUPER_ADMIN");
+      await refresh(); return { success: true, message: "OK" };
     }
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error || !data?.session) {
-      setLoading(false);
-      return { success: false, message: "Invalid credentials." };
-    }
-    await refresh();
+    if (error || !data?.session) { setLoading(false); return { success: false, message: "Invalid credentials." }; }
+    await hydrateSupabase(data.session);
     return { success: true, message: "OK" };
   };
 
   const logout = async () => {
-    if (isMock) { localStorage.removeItem(MOCK_STORAGE_KEY); } 
-    else { await supabase.auth.signOut(); }
+    if (isMock) clearMockSession(); else await supabase.auth.signOut();
     await refresh();
   };
 
