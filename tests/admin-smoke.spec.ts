@@ -1,41 +1,49 @@
 import { test, expect } from "@playwright/test";
 
-test("admin smoke: login + portals + sidebar + header controls", async ({ page }) => {
+const ROUTES = [
+  "/admin/dashboard",
+  "/admin/approvals",
+  "/admin/shipments",
+  "/admin/fleet",
+  "/admin/omni-finance",
+  "/admin/live-map",
+  "/admin/settings",
+];
+
+test("admin: login + Prev/Next full walk + sidebar sanity + signout", async ({ page }) => {
   await page.goto("/login");
 
   await page.getByTestId("login-email").fill("demo@britium.test");
   await page.getByTestId("login-password").fill("demo");
   await page.getByTestId("login-submit").click();
 
-  await expect(page).toHaveURL(/\/admin\/dashboard/);
+  await expect(page).toHaveURL(ROUTES[0]);
 
-  // Portal entrances
-  await page.getByTestId("portal-approvals").click();
-  await expect(page).toHaveURL(/\/admin\/approvals/);
+  // Forward: Next through all routes
+  await expect(page.getByTestId("btn-prev")).toBeDisabled();
+  for (let i = 0; i < ROUTES.length - 1; i++) {
+    await page.getByTestId("btn-next").click();
+    await expect(page).toHaveURL(ROUTES[i + 1]);
+  }
+  await expect(page.getByTestId("btn-next")).toBeDisabled();
 
-  await page.getByTestId("btn-prev").click();
-  await expect(page).toHaveURL(/\/admin\/dashboard/);
+  // Backward: Prev to start
+  for (let i = ROUTES.length - 1; i > 0; i--) {
+    await page.getByTestId("btn-prev").click();
+    await expect(page).toHaveURL(ROUTES[i - 1]);
+  }
+  await expect(page.getByTestId("btn-prev")).toBeDisabled();
 
-  await page.getByTestId("portal-shipments").click();
-  await expect(page).toHaveURL(/\/admin\/shipments/);
+  // Sidebar spot checks (ensures routing still works)
+  await page.getByTestId("nav-shipments").click();
+  await expect(page).toHaveURL("/admin/shipments");
 
-  // Sidebar routing
-  await page.getByTestId("nav-fleet").click();
-  await expect(page).toHaveURL(/\/admin\/fleet/);
+  await page.getByTestId("nav-dashboard").click();
+  await expect(page).toHaveURL("/admin/dashboard");
 
-  await page.getByTestId("nav-finance").click();
-  await expect(page).toHaveURL(/\/admin\/omni-finance/);
-
-  await page.getByTestId("nav-live-map").click();
-  await expect(page).toHaveURL(/\/admin\/live-map/);
-
-  await page.getByTestId("nav-settings").click();
-  await expect(page).toHaveURL(/\/admin\/settings/);
-
-  // Header controls
+  // Language toggle + account dropdown + signout
   await page.getByTestId("btn-lang").click();
   await page.getByTestId("btn-account").click();
   await page.getByTestId("menu-signout").click();
-
   await expect(page).toHaveURL(/\/login/);
 });
