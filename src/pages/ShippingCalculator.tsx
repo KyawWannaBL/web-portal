@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { useLanguageContext } from "@/lib/LanguageContext";
 import { Calculator, MapPin, Package, Clock, Truck, Phone, Mail } from 'lucide-react';

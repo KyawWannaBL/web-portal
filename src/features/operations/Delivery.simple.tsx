@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { MapPin, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 

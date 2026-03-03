@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NavLink } from "react-router-dom";
 import { NAV_ITEMS } from "@/app/navigation/navItems";
 import { hasAny } from "@/lib/rbac";

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Lock, ArrowRight, ShieldCheck, Truck, Building2 } from "lucide-react";

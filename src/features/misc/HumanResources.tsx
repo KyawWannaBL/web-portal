@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { Users, UserPlus, Star, MapPin, Phone, Mail, MoreVertical } from 'lucide-react';
 

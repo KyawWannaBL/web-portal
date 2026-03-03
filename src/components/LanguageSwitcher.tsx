@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Globe, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';

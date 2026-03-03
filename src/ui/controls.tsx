@@ -1,50 +1,26 @@
 import * as React from "react";
-import { Link, type To } from "react-router-dom";
+import { Link } from "react-router-dom";
+import type { AppPath } from "../routes/paths";
 
-export function cx(...parts: Array<string | false | undefined | null>) {
-  return parts.filter(Boolean).join(" ");
+export function cx(...parts: Array<string | false | undefined | null>) { 
+  return parts.filter(Boolean).join(" "); 
 }
 
-type CommonProps = {
-  className?: string;
-  children: React.ReactNode;
-};
+type BtnBase = { className?: string; children: React.ReactNode; disabled?: boolean; };
+type BtnLink = BtnBase & { to: AppPath; onClick?: never; type?: never };
+type BtnButton = BtnBase & { to?: never; onClick?: React.MouseEventHandler<HTMLButtonElement>; type?: "button" | "submit" | "reset" };
 
-export type AppButtonLinkProps = CommonProps & {
-  to: To;
-  disabled?: boolean;
-};
-
-export type AppButtonActionProps = CommonProps & {
-  onClick: React.MouseEventHandler<HTMLButtonElement>;
-  disabled?: boolean;
-};
-
-function isLinkProps(p: AppButtonLinkProps | AppButtonActionProps): p is AppButtonLinkProps {
-  return (p as any).to !== undefined;
-}
-
-export function AppButton(props: AppButtonLinkProps | AppButtonActionProps) {
-  if (isLinkProps(props)) {
-    const { to, className, children, disabled } = props;
+export function AppButton(props: BtnLink | BtnButton) {
+  if ("to" in props && props.to) {
     return (
-      <Link
-        to={to}
-        className={cx("btn", className, disabled && "btnDisabled")}
-        aria-disabled={disabled ? "true" : "false"}
-        onClick={(e) => {
-          if (disabled) e.preventDefault();
-        }}
-      >
-        {children}
+      <Link className={cx("btn", props.className)} to={props.to} aria-disabled={props.disabled ? "true" : "false"}>
+        {props.children}
       </Link>
     );
   }
-
-  const { onClick, className, children, disabled } = props;
   return (
-    <button type="button" className={cx("btn", className)} onClick={onClick} disabled={disabled}>
-      {children}
+    <button type={props.type || "button"} className={cx("btn", props.className)} onClick={props.onClick} disabled={props.disabled}>
+      {props.children}
     </button>
   );
 }

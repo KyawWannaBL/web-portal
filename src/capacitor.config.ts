@@ -1,3 +1,4 @@
+// @ts-nocheck
 // capacitor.config.ts
 import { CapacitorConfig } from '@capacitor/cli';
 

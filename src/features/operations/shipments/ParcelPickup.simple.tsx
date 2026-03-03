@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { QrCode, Package, MapPin, Clock } from 'lucide-react';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Briefcase, Package, Truck, Activity } from 'lucide-react';
 

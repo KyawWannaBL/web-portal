@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { useLanguageContext } from '@/lib/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';

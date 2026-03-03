@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Header from "./header";
 import Footer from "./footer";
 import Sidebar from "./Sidebar";

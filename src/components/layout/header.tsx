@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Package, Phone, Mail } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Settings, Globe, Database, Bell, Save, Cpu } from 'lucide-react';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as React from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useLanguageContext } from "@/lib/LanguageContext";

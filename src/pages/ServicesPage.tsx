@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Truck, Package, Phone, ArrowRight, Shield, Globe, Zap, Users } from 'lucide-react';

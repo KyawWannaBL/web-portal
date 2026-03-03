@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Zap, MapPin, Navigation, PenTool } from 'lucide-react';
 

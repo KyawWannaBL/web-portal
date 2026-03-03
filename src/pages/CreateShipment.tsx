@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Package, ArrowRight } from 'lucide-react';

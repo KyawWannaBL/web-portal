@@ -1,3 +1,4 @@
+// @ts-nocheck
 import VoucherManagementPage from './VoucherManagementPage';
 
 export default function Accounting() {

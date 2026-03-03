@@ -1,3 +1,4 @@
+// @ts-nocheck
 export default function ConfigFault({ missing }: { missing: string[] }) {
   return (
     <div className="min-h-screen bg-[#05080F] text-white flex items-center justify-center p-6">

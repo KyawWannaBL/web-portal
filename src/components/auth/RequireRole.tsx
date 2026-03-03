@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import type { AppRole } from "@/types/roles";

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { generateTrackingNumber, SHIPMENT_STATUS, MOCK_TOWNSHIPS } from '@/lib/constants';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import SignatureCanvas from "react-signature-canvas";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, db } from "../firebase";

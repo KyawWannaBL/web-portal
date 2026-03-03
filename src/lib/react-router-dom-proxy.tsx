@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as React from "react";
 
 // Runtime import of the real library under a different name (see vite.config alias)

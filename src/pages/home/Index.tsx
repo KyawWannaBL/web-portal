@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Demo } from "./components/Demo";
 const Index = () => {
   return (

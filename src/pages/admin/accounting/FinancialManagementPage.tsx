@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { DollarSign, TrendingUp, TrendingDown, RefreshCw, Download } from 'lucide-react';

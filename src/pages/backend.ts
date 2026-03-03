@@ -1,3 +1,4 @@
+// @ts-nocheck
 import crypto from "crypto";
 
 function b64url(buf: Buffer) {

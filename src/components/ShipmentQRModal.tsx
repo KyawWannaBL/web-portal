@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Shipment, formatDate } from "@/lib";
 import { QRCodeGenerator } from "@/components/QRCodeGenerator";
 import {

@@ -2,8 +2,7 @@ import * as React from "react";
 
 type SvgProps = React.SVGProps<SVGSVGElement> & { title?: string };
 
-export function UserIcon(props: SvgProps) {
-  const { title = "User", ...rest } = props;
+export function UserIcon({ title = "User", ...rest }: SvgProps) {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...rest}>
       <title>{title}</title>
@@ -12,8 +11,7 @@ export function UserIcon(props: SvgProps) {
   );
 }
 
-export function ChevronDown(props: SvgProps) {
-  const { title = "Open", ...rest } = props;
+export function ChevronDown({ title = "Open", ...rest }: SvgProps) {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...rest}>
       <title>{title}</title>

@@ -8,7 +8,7 @@ export default function GenericPage({ titleKey }: { titleKey: string }) {
     <section className="page">
       <div className="card">
         <div className="cardTitle">{t(titleKey)}</div>
-        <div className="muted">Placeholder content.</div>
+        <div className="muted">Dashboard metrics and controls will mount here.</div>
         <Link className="link" to={PATHS.commandCenter}>← {t("backToCommandCenter")}</Link>
       </div>
     </section>

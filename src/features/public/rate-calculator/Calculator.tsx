@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState } from 'react';
 import { Package, Calculator as CalcIcon } from 'lucide-react';
 

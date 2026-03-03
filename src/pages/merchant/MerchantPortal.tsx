@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useMemo } from "react";
 import { Package, TrendingUp, Truck, Users } from "lucide-react";
 

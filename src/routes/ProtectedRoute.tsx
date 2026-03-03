@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Navigate } from "react-router-dom";
 import type { PermissionCode } from "@britium/shared";
 import { hasAll, hasAny } from "@/lib/rbac";

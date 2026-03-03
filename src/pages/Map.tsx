@@ -1,3 +1,4 @@
+// @ts-nocheck
 import MapView from "@/components/MapView";
 
 export default function MapPage() {

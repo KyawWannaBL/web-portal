@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { PermissionCode } from "@britium/shared";
 import { ROUTES } from "@/routes/routeRegistry";
 

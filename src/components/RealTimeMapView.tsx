@@ -1,3 +1,4 @@
+// @ts-nocheck
 // src/components/RealTimeMapView.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';

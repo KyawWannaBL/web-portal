@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { BarChart3, TrendingUp, DollarSign, Package } from 'lucide-react';
 

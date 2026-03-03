@@ -17,7 +17,7 @@ export default function Sidebar() {
   const { t } = useI18n();
 
   return (
-    <aside className="sidebar" aria-label="Primary">
+    <aside className="sidebar" aria-label="Primary Navigation">
       <div className="brand">
         <div className="brandBadge" aria-hidden="true" />
         <div className="brandTitle">

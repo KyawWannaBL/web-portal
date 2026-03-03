@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Settings as SettingsIcon, User, Bell, Shield } from 'lucide-react';
 

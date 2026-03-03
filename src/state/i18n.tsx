@@ -31,7 +31,8 @@ const TRANSLATIONS: Record<Lang, Record<string, string>> = {
     hrPortal: "HR Portal", hrPortalDesc: "Review employee records, shifts, and departmental assignments.",
     notFound: "NOT FOUND", routeMissing: "ROUTE MISSING",
     backToCommandCenter: "Back to Command Center", loginTitle: "Sign in",
-    loginDesc: "Demo login to enable routing.", signIn: "Sign in"
+    loginDesc: "Enter your corporate credentials.", signIn: "Authenticate",
+    email: "Email Address", password: "Password", loggingIn: "Authenticating..."
   },
   my: {
     brand: "BRITIUM", level: "L5", authorizedSession: "အတည်ပြုထားသော အသုံးပြုသူ • ဆက်ရှင် လှုပ်ရှားနေသည်",
@@ -51,7 +52,8 @@ const TRANSLATIONS: Record<Lang, Record<string, string>> = {
     hrPortal: "လူမှုရေး/ဝန်ထမ်း ပေါ်တယ်", hrPortalDesc: "ဝန်ထမ်းမှတ်တမ်းများ၊ တာဝန်ချိန်များနှင့် ဌာနအလိုက်တာဝန်ချထားမှုများကို စစ်ဆေးရန်။",
     notFound: "မတွေ့ပါ", routeMissing: "လမ်းကြောင်း မရှိ",
     backToCommandCenter: "ရုံးချုပ်သို့ ပြန်သွားရန်", loginTitle: "ဝင်ရောက်ရန်",
-    loginDesc: "Demo ဝင်ရောက်မှုဖြင့် routing ကို ဖွင့်ပါ။", signIn: "ဝင်ရောက်ရန်"
+    loginDesc: "သင့်ကော်ပိုရိတ်အချက်အလက်များထည့်ပါ။", signIn: "ဝင်ရောက်ရန်",
+    email: "အီးမေးလ်", password: "စကားဝှက်", loggingIn: "ဝင်ရောက်နေသည်..."
   }
 };
 
@@ -67,8 +69,8 @@ export function I18nProvider(props: { children: React.ReactNode }) {
   }, []);
 
   const toggleLang = React.useCallback(() => {
-    setLang(lang === "en" ? "my" : "en");
-  }, [lang, setLang]);
+    setLang((prev) => (prev === "en" ? "my" : "en"));
+  }, []);
 
   const t = React.useCallback(
     (key: string) => TRANSLATIONS[lang][key] ?? TRANSLATIONS.en[key] ?? key,

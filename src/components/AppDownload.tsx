@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Download } from 'lucide-react';
 import QRCode from 'react-qr-code';

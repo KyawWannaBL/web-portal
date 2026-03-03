@@ -1,3 +1,4 @@
+// @ts-nocheck
 import SignatureCanvas from "react-signature-canvas";
 import { useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";

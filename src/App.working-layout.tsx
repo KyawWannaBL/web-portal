@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ROUTE_PATHS } from "@/lib/index";

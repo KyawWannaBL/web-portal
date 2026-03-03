@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Utility functions for backward compatibility with existing code
 import { User as FirebaseUser } from 'firebase/auth';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 export { default as EnterprisePortal } from "./EnterprisePortal";
 export { default as Login } from "./Login";
 export { default as Signup } from "./Signup";

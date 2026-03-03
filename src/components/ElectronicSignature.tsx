@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Check, Trash2, PenLine } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';

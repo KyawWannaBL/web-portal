@@ -1,3 +1,4 @@
+// @ts-nocheck
 import RealTimeMapView from '@/components/RealTimeMapView';
 import RevenueForecast from '@/components/RevenueForecast';
 

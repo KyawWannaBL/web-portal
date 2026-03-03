@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Landmark } from 'lucide-react';

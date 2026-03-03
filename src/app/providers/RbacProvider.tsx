@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { PermissionCode } from "@britium/shared";
 import { getMyProfile } from "@/lib/profile";

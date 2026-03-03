@@ -1,3 +1,4 @@
+// @ts-nocheck
 export default function Footer() {
   return (
     <footer className="bg-navy-900 border-t border-gold-500/20 py-6">

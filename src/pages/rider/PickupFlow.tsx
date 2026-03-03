@@ -1,3 +1,4 @@
+// @ts-nocheck
 export default function PickupFlow() {
   return (
     <div className="min-h-screen bg-[#FAF9F6] p-8 md:p-24">

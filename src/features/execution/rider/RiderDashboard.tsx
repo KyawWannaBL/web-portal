@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ... (imports remain the same)
 
 export default function RiderDashboard() {

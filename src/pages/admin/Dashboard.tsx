@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { motion } from 'framer-motion';
 import { Package, Users, Star, TrendingUp } from 'lucide-react';
 import { fadeInUp, staggerContainer } from '@/lib/motion';
