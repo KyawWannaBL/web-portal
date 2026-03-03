@@ -13,6 +13,7 @@ import {
   Truck,
   LogOut,
   UserCircle2,
+  Users,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -38,54 +39,19 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { lang, toggleLang, t } = useLanguage();
-  const { user, role, logout } = useAuth();
+  const { user, role, logout, isMock } = useAuth();
 
   const accountName = (user?.email?.split("@")[0] ?? user?.email ?? "—") as string;
 
   const menuItems: NavItem[] = useMemo(
     () => [
-      {
-        id: "dash",
-        path: "/admin/dashboard",
-        icon: <LayoutDashboard />,
-        label: { en: "Executive Overview", my: "အမှုဆောင် ခြုံငုံသုံးသပ်ချက်" },
-      },
-      {
-        id: "approvals",
-        path: "/admin/approvals",
-        icon: <ShieldCheck />,
-        label: { en: "Account Approvals", my: "အကောင့် အတည်ပြုမှုများ" },
-      },
-      {
-        id: "ship",
-        path: "/admin/shipments",
-        icon: <PackageSearch />,
-        label: { en: "Shipment Control", my: "ပို့ဆောင်မှု ထိန်းချုပ်မှု" },
-      },
-      {
-        id: "fleet",
-        path: "/admin/fleet",
-        icon: <Truck />,
-        label: { en: "Fleet Command", my: "ယာဉ်တပ် စီမံခန့်ခွဲမှု" },
-      },
-      {
-        id: "fin",
-        path: "/admin/omni-finance",
-        icon: <Landmark />,
-        label: { en: "Global Finance", my: "ကမ္ဘာလုံးဆိုင်ရာ ငွေကြေး" },
-      },
-      {
-        id: "map",
-        path: "/admin/live-map",
-        icon: <Map />,
-        label: { en: "Live Telemetry", my: "တိုက်ရိုက် တယ်လီမထရီ" },
-      },
-      {
-        id: "sets",
-        path: "/admin/settings",
-        icon: <Settings />,
-        label: { en: "System Tariffs", my: "စနစ် အခွန်အကောက်" },
-      },
+      { id: "dash", path: "/admin/dashboard", icon: <LayoutDashboard />, label: { en: "Executive Overview", my: "အမှုဆောင် ခြုံငုံသုံးသပ်ချက်" } },
+      { id: "approvals", path: "/admin/approvals", icon: <ShieldCheck />, label: { en: "Account Approvals", my: "အကောင့် အတည်ပြုမှုများ" } },
+      { id: "ship", path: "/admin/shipments", icon: <PackageSearch />, label: { en: "Shipment Control", my: "ပို့ဆောင်မှု ထိန်းချုပ်မှု" } },
+      { id: "fleet", path: "/admin/fleet", icon: <Truck />, label: { en: "Fleet Command", my: "ယာဉ်တပ် စီမံခန့်ခွဲမှု" } },
+      { id: "fin", path: "/admin/omni-finance", icon: <Landmark />, label: { en: "Global Finance", my: "ကမ္ဘာလုံးဆိုင်ရာ ငွေကြေး" } },
+      { id: "map", path: "/admin/live-map", icon: <Map />, label: { en: "Live Telemetry", my: "တိုက်ရိုက် တယ်လီမထရီ" } },
+      { id: "sets", path: "/admin/settings", icon: <Settings />, label: { en: "System Tariffs", my: "စနစ် အခွန်အကောက်" } },
     ],
     []
   );
@@ -135,11 +101,7 @@ export default function AdminLayout() {
               }`}
             >
               <div className="flex items-center gap-4 text-sm font-bold">
-                <span
-                  className={
-                    location.pathname === item.path ? "text-emerald-400" : "group-hover:text-emerald-500"
-                  }
-                >
+                <span className={location.pathname === item.path ? "text-emerald-400" : "group-hover:text-emerald-500"}>
                   {item.icon}
                 </span>
                 {t(item.label.en, item.label.my)}
@@ -180,6 +142,10 @@ export default function AdminLayout() {
           </div>
 
           <div className="flex items-center gap-3">
+            <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+              {isMock ? t("MOCK MODE", "MOCK မုဒ်") : ""}
+            </div>
+
             <button
               onClick={toggleLang}
               className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-white transition-all"
@@ -200,23 +166,14 @@ export default function AdminLayout() {
 
               {open && (
                 <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-white/10 bg-[#05080F]/95 backdrop-blur-xl shadow-2xl overflow-hidden">
-                  <button
-                    onClick={() => (setOpen(false), navigate("/admin/accounts"))}
-                    className="w-full px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
-                  >
+                  <button onClick={() => (setOpen(false), navigate("/admin/accounts"))} className="w-full px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5">
                     {t("Account Control", "အကောင့် ထိန်းချုပ်မှု")}
                   </button>
-                  <button
-                    onClick={() => (setOpen(false), navigate("/admin/hr"))}
-                    className="w-full px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
-                  >
+                  <button onClick={() => (setOpen(false), navigate("/admin/hr"))} className="w-full px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5">
                     {t("HR Portal", "ဝန်ထမ်း ပေါ်တယ်")}
                   </button>
                   <div className="h-px bg-white/10" />
-                  <button
-                    onClick={() => (setOpen(false), void signOut())}
-                    className="w-full px-4 py-3 text-left text-sm text-rose-300 hover:bg-rose-500/10 flex items-center gap-2"
-                  >
+                  <button onClick={() => (setOpen(false), void signOut())} className="w-full px-4 py-3 text-left text-sm text-rose-300 hover:bg-rose-500/10 flex items-center gap-2">
                     <LogOut className="h-4 w-4" />
                     {t("Sign out", "ထွက်ရန်")}
                   </button>
@@ -224,10 +181,7 @@ export default function AdminLayout() {
               )}
             </div>
 
-            <button
-              onClick={() => void signOut()}
-              className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 rounded-xl text-xs font-bold text-rose-200 transition-all"
-            >
+            <button onClick={() => void signOut()} className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 rounded-xl text-xs font-bold text-rose-200 transition-all">
               <LogOut className="h-4 w-4" />
               {t("Sign out", "ထွက်ရန်")}
             </button>

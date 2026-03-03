@@ -11,18 +11,18 @@ type CommonProps = {
 };
 
 type LinkProps = CommonProps & {
-  to: To; // must be defined
-  onClick?: never;
+  to: To;
   disabled?: boolean;
+  onClick?: never;
 };
 
-type ButtonProps = CommonProps & {
-  to?: never;
+type BtnProps = CommonProps & {
   onClick: React.MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
+  to?: never;
 };
 
-export function AppButton(props: LinkProps | ButtonProps) {
+export function AppButton(props: LinkProps | BtnProps) {
   if ("to" in props) {
     const { to, className, children, disabled } = props;
     return (

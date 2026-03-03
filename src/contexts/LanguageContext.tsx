@@ -1,19 +1,20 @@
-import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export type Language = "en" | "my";
-type LanguageContextType = {
+
+type Ctx = {
   lang: Language;
   toggleLang: () => void;
   t: (en: string, my?: string) => string;
 };
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = createContext<Ctx | null>(null);
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLang] = useState<Language>("en");
 
   useEffect(() => {
-    const saved = localStorage.getItem("btx_lang") as Language | null;
+    const saved = localStorage.getItem("btx_lang");
     if (saved === "en" || saved === "my") setLang(saved);
   }, []);
 
@@ -23,20 +24,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("btx_lang", next);
   };
 
-  const t = useMemo(
-    () => (en: string, my?: string) => (lang === "my" && my ? my : en),
-    [lang]
-  );
+  const t = useMemo(() => (en: string, my?: string) => (lang === "my" && my ? my : en), [lang]);
 
-  return (
-    <LanguageContext.Provider value={{ lang, toggleLang, t }}>
-      {children}
-    </LanguageContext.Provider>
-  );
+  return <LanguageContext.Provider value={{ lang, toggleLang, t }}>{children}</LanguageContext.Provider>;
 }
 
 export function useLanguage() {
-  const context = useContext(LanguageContext);
-  if (!context) throw new Error("useLanguage must be used within a LanguageProvider");
-  return context;
+  const v = useContext(LanguageContext);
+  if (!v) throw new Error("useLanguage must be used within LanguageProvider");
+  return v;
 }

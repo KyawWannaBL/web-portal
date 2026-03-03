@@ -1,12 +1,12 @@
-import * as React from "react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
-export function RequireAuth() {
+export default function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
   const loc = useLocation();
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-xs">Verifying session…</div>;
+  if (loading) return null;
   if (!isAuthenticated) return <Navigate to="/login" replace state={{ from: loc.pathname }} />;
-  return <Outlet />;
+  return <>{children}</>;
 }
