@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { LanguageProvider } from "./contexts/LanguageContext";
+import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
 import AdminLayout from "./components/AdminLayout";
 import Login from "./pages/Login";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
@@ -10,7 +10,23 @@ import Unauthorized from "./pages/Unauthorized";
 import { RequireAuth } from "@/routes/RequireAuth";
 import { RequireRole } from "@/routes/RequireRole";
 
-const Loading = () => <div className="bg-[#05080F] min-h-screen" />;
+// New Modules imported here
+import ShipmentControl from "./pages/ShipmentControl";
+import FleetCommand from "./pages/FleetCommand";
+import OmniFinance from "./pages/OmniFinance";
+import LiveMap from "./pages/LiveMap";
+import SystemTariffs from "./pages/SystemTariffs";
+
+const Loading = () => {
+  const { lang } = useLanguage();
+  return (
+    <div className="min-h-screen bg-[#05080F] flex flex-col items-center justify-center font-mono text-emerald-500">
+      <div className="animate-pulse uppercase tracking-widest text-[10px]">
+        {lang === 'en' ? 'INITIALIZING L5 SECURE GATEWAY...' : 'L5 လုံခြုံရေးဂိတ်ကို စတင်နေပါသည်...'}
+      </div>
+    </div>
+  );
+};
 
 export default function App() {
   return (
@@ -18,36 +34,28 @@ export default function App() {
       <Suspense fallback={<Loading />}>
         <Router>
           <Routes>
-            {/* Public Entry */}
             <Route path="/login" element={<Login />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
-
-            {/* L5 Command Infrastructure */}
             <Route element={<RequireAuth />}>
               <Route path="/admin" element={
-                <RequireRole allow={["SYS", "APP_OWNER", "SUPER_ADMIN", "SUPER_A"]}>
+                <RequireRole allow={["SYS", "APP_OWNER", "SUPER_ADMIN", "SUPER_A", "MGR"]}>
                   <AdminLayout />
                 </RequireRole>
               }>
                 <Route index element={<Navigate to="dashboard" replace />} />
-                
-                {/* Core Administrative Modules */}
                 <Route path="dashboard" element={<SuperAdminDashboard />} />
+                
+                {/* Properly mapped dynamic routes */}
                 <Route path="approvals" element={<AccountControl />} />
                 <Route path="accounts" element={<AccountControl />} />
                 <Route path="hr" element={<HRPortal />} />
-
-                {/* Sidebar Mappings to prevent Redirect loops */}
-                <Route path="shipments" element={<SuperAdminDashboard />} />
-                <Route path="fleet" element={<SuperAdminDashboard />} />
-                <Route path="omni-finance" element={<SuperAdminDashboard />} />
-                <Route path="live-map" element={<SuperAdminDashboard />} />
-                <Route path="settings" element={<SuperAdminDashboard />} />
+                <Route path="shipments" element={<ShipmentControl />} />
+                <Route path="fleet" element={<FleetCommand />} />
+                <Route path="omni-finance" element={<OmniFinance />} />
+                <Route path="live-map" element={<LiveMap />} />
+                <Route path="settings" element={<SystemTariffs />} />
               </Route>
             </Route>
-
-            {/* Global Fallback Protection */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Router>
