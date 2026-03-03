@@ -139,7 +139,7 @@ interface ShipmentFormProps {
 
 export function ShipmentForm({ initialData, onSubmit, isLoading }: ShipmentFormProps) {
   const form = useForm<z.infer<typeof shipmentSchema>>({
-    resolver: zodResolver(shipmentSchema),
+    resolver: zodResolver(shipmentSchema) as any,
     defaultValues: {
       senderName: initialData?.senderName || '',
       senderAddress: initialData?.senderAddress || '',

@@ -1,33 +1,24 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
-type Language = 'en' | 'my';
-interface LanguageContextType { lang: Language; toggleLang: () => void; }
+export const LanguageContext = createContext<any>({
+  language: 'en',
+  lang: 'en',
+  setLanguage: () => {},
+  toggleLang: () => {},
+  t: (key: string) => key,
+});
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+export function useLanguage() { return useContext(LanguageContext); }
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Language>('en');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('btx_lang') as Language;
-    if (saved) setLang(saved);
-  }, []);
-
-  const toggleLang = () => {
-    const next = lang === 'en' ? 'my' : 'en';
-    setLang(next);
-    localStorage.setItem('btx_lang', next);
-  };
-
+export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
+  const [lang, setLang] = useState('en');
   return (
-    <LanguageContext.Provider value={{ lang, toggleLang }}>
+    <LanguageContext.Provider value={{ 
+      language: lang, lang, setLanguage: setLang, 
+      toggleLang: () => setLang(l => l==='en'?'my':'en'), 
+      t: (k: string) => k 
+    }}>
       {children}
     </LanguageContext.Provider>
   );
-}
-
-export function useLanguage() {
-  const context = useContext(LanguageContext);
-  if (!context) throw new Error('useLanguage must be used within a LanguageProvider');
-  return context;
-}
+};

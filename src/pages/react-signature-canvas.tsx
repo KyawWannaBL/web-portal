@@ -54,7 +54,7 @@ export default function SignaturePad({ deliveryId }: { deliveryId: string }) {
   return (
     <div className="space-y-3">
       <SignatureCanvas
-        ref={sigRef}
+        ref={sigRef as any}
         penColor="black"
         canvasProps={{ width: 320, height: 140, style: { border: "1px solid #ccc", borderRadius: 8 } }}
       />

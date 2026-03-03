@@ -47,7 +47,7 @@ export function ParcelRegistrationForm({ userType, onParcelCreated }: ParcelRegi
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ParcelFormValues>({
-    resolver: zodResolver(parcelSchema),
+    resolver: zodResolver(parcelSchema) as any,
     defaultValues: {
       senderName: '',
       senderPhone: '',

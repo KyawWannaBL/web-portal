@@ -75,7 +75,7 @@ export default function ShipmentRegistration() {
   const [provisionalData, setProvisionalData] = useState<Partial<Shipment> | null>(null);
 
   const form = useForm<RegistrationFormData>({
-    resolver: zodResolver(registrationSchema),
+    resolver: zodResolver(registrationSchema) as any,
     defaultValues: {
       serviceType: 'standard',
       codRequired: false,

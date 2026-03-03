@@ -21,14 +21,15 @@ export const routes: RouteObject[] = [
     ),
     children: [
       { index: true, element: <CommandCenterPage /> },
-      { path: PATHS.accountApprovals.slice(1), element: <GenericPage titleKey="accountApprovals" /> },
-      { path: PATHS.shipmentControl.slice(1), element: <GenericPage titleKey="shipmentControl" /> },
-      { path: PATHS.fleetCommand.slice(1), element: <GenericPage titleKey="fleetCommand" /> },
-      { path: PATHS.globalFinance.slice(1), element: <GenericPage titleKey="globalFinance" /> },
-      { path: PATHS.liveTelemetry.slice(1), element: <GenericPage titleKey="liveTelemetry" /> },
-      { path: PATHS.systemTariffs.slice(1), element: <GenericPage titleKey="systemTariffs" /> },
-      { path: PATHS.accountControl.slice(1), element: <AccountControlPage /> },
-      { path: PATHS.hrPortal.slice(1), element: <HRPortalPage /> },
+      // Fixed: Using absolute paths directly without .slice(1)
+      { path: PATHS.accountApprovals, element: <GenericPage titleKey="accountApprovals" /> },
+      { path: PATHS.shipmentControl, element: <GenericPage titleKey="shipmentControl" /> },
+      { path: PATHS.fleetCommand, element: <GenericPage titleKey="fleetCommand" /> },
+      { path: PATHS.globalFinance, element: <GenericPage titleKey="globalFinance" /> },
+      { path: PATHS.liveTelemetry, element: <GenericPage titleKey="liveTelemetry" /> },
+      { path: PATHS.systemTariffs, element: <GenericPage titleKey="systemTariffs" /> },
+      { path: PATHS.accountControl, element: <AccountControlPage /> },
+      { path: PATHS.hrPortal, element: <HRPortalPage /> },
       { path: "*", element: <NotFoundPage /> }
     ]
   }

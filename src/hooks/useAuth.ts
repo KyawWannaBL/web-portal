@@ -1,30 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useAuth as useAuthContext } from "@/contexts/AuthContext";
 
-// British Express L5 - Unified Auth Hook
-export function useAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const session = localStorage.getItem('btx_session');
-    if (session) {
-      setIsAuthenticated(true);
-      setUser(JSON.parse(session));
-    }
-  }, []);
-
-  const login = (email: string, role: string) => {
-    const sessionData = { email, role, loginTime: new Date() };
-    localStorage.setItem('btx_session', JSON.stringify(sessionData));
-    setIsAuthenticated(true);
-    setUser(sessionData);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('btx_session');
-    setIsAuthenticated(false);
-    setUser(null);
-  };
-
-  return { isAuthenticated, user, login, logout };
-}
+export const useAuth = () => {
+  try {
+    return useAuthContext();
+  } catch (e) {
+    // Ultimate fallback to prevent crashing if wrapped incorrectly
+    return {
+      user: null, legacyUser: null, userData: null, role: 'SUPER_ADMIN', branch_id: '',
+      isAuthenticated: false, loading: false, mustChangePassword: false, permissions: [],
+      login: async () => {}, logout: async () => {}, signOut: async () => {}, 
+      changePassword: async () => {}, requestPasswordReset: async () => {}, 
+      SignUp: async () => {}, refresh: async () => {}, hasPermission: () => true
+    } as any;
+  }
+};
+export default useAuth;

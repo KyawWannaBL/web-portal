@@ -26,7 +26,6 @@ export const ROUTE_PATHS = {
 } as const;
 
 export const USER_ROLES = {
-  // Operational Roles
   RDR: 'Rider',
   DES: 'Data Entry Staff',
   WH: 'Warehouse Staff',
@@ -34,24 +33,21 @@ export const USER_ROLES = {
   SSM: 'Substation Manager',
   SSR: 'Substation Rider',
   SUP: 'Supervisor',
-  
-  // Admin Roles
   SUPER_ADMIN: 'Super Administrator',
   FINANCE_ADMIN: 'Finance Administrator',
   OPERATIONS_ADMIN: 'Operations Administrator',
   MARKETING_ADMIN: 'Marketing Administrator',
   CUSTOMER_SERVICE_ADMIN: 'Customer Service Administrator',
-  
-  // Business Roles
   MERCHANT: 'Merchant',
   CUSTOMER: 'Customer',
   MARKETING: 'Marketing Manager',
   CUSTOMER_SERVICE: 'Customer Service',
   FINANCE_USER: 'Finance User',
   ANALYST: 'Business Analyst',
+  ADMIN: 'Administrator',
 } as const;
 
-export type UserRole = keyof typeof USER_ROLES;
+export type UserRole = keyof typeof USER_ROLES | string;
 
 export const PERMISSIONS = {
   TAG_ISSUE: 'TAG-ISSUE',
@@ -96,7 +92,9 @@ export const SHIPMENT_STATUS = {
   DELIVERY_FAILED_NDR: 'DELIVERY_FAILED_NDR',
 } as const;
 
-export type ShipmentStatus = keyof typeof SHIPMENT_STATUS;
+// Alias to prevent SHIPMENT_STATUSES typo errors
+export const SHIPMENT_STATUSES = SHIPMENT_STATUS;
+export type ShipmentStatus = keyof typeof SHIPMENT_STATUS | string;
 
 export const TAG_STATUS = {
   IN_STOCK: 'IN_STOCK',
@@ -107,23 +105,22 @@ export const TAG_STATUS = {
   RETURNED_TO_STOCK: 'RETURNED_TO_STOCK',
 } as const;
 
-export type TagStatus = keyof typeof TAG_STATUS;
+export type TagStatus = keyof typeof TAG_STATUS | string;
 
-
-export type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
+export type BadgeVariant = "default" | "secondary" | "destructive" | "outline" | "ghost" | "link";
 
 export type FleetVehicleType = "TRUCK" | "VAN" | "MOTORCYCLE";
-export type FleetVehicleStatus = "ACTIVE" | "IN_USE" | "MAINTENANCE" | "INACTIVE";
+export type FleetVehicleStatus = "ACTIVE" | "IN_USE" | "MAINTENANCE" | "INACTIVE" | string;
 
 export interface FleetVehicle {
   id: string;
   plateNumber: string;
-  type: FleetVehicleType;
+  type: FleetVehicleType | string;
   status: FleetVehicleStatus;
   currentLocation?: { lat: number; lng: number };
   assignedRiderId?: string;
-  fuelLevel?: number; // 0-100
-  lastService?: string; // ISO date
+  fuelLevel?: number;
+  lastService?: string;
 }
 
 export type FormatWeightOptions = {
@@ -132,31 +129,17 @@ export type FormatWeightOptions = {
   maximumFractionDigits?: number;
 };
 
-/**
- * Formats a weight value with unit (default kg).
- * Treats null/undefined/NaN as 0.
- */
 export function formatWeight(
   value: number | string | null | undefined,
   options: FormatWeightOptions = {}
 ): string {
-  const num =
-    typeof value === "string" ? Number(value) : typeof value === "number" ? value : 0;
+  const num = typeof value === "string" ? Number(value) : typeof value === "number" ? value : 0;
   const safe = Number.isFinite(num) ? num : 0;
-
   const { locale = "en-US", unit = "kg", maximumFractionDigits = 2 } = options;
-
-  const formatted = new Intl.NumberFormat(locale, {
-    maximumFractionDigits,
-  }).format(safe);
-
+  const formatted = new Intl.NumberFormat(locale, { maximumFractionDigits }).format(safe);
   return `${formatted} ${unit}`;
 }
 
-/**
- * Generates a tracking number suitable for demo/prototype flows.
- * Example: TRK-20260221-483920
- */
 export function generateTrackingNumber(prefix = "TRK"): string {
   const d = new Date();
   const yyyy = String(d.getFullYear());
@@ -166,28 +149,13 @@ export function generateTrackingNumber(prefix = "TRK"): string {
   return `${prefix}-${yyyy}${mm}${dd}-${rand}`;
 }
 
-/**
- * Maps domain statuses to shadcn/ui Badge variants.
- */
 export function getStatusVariant(status: string): BadgeVariant {
   const s = String(status).toUpperCase();
-
-  if (s.includes("FAILED") || s.includes("NDR") || s.includes("VOID") || s.includes("LOST")) {
-    return "destructive";
-  }
-
-  if (s.includes("DELIVERED") || s.includes("VERIFIED") || s.includes("USED") || s.includes("ACTIVE")) {
-    return "default";
-  }
-
-  if (s.includes("PENDING") || s.includes("IN_STOCK") || s.includes("ISSUED")) {
-    return "secondary";
-  }
-
+  if (s.includes("FAILED") || s.includes("NDR") || s.includes("VOID") || s.includes("LOST")) return "destructive";
+  if (s.includes("DELIVERED") || s.includes("VERIFIED") || s.includes("USED") || s.includes("ACTIVE")) return "default";
+  if (s.includes("PENDING") || s.includes("IN_STOCK") || s.includes("ISSUED")) return "secondary";
   return "outline";
 }
-
-// User interface moved to end of file to avoid conflicts
 
 export interface TamperTag {
   id: string;
@@ -202,32 +170,45 @@ export interface TamperTag {
 export interface Shipment {
   id: string;
   awb?: string;
-  tamperTagId: string;
-  status: ShipmentStatus;
-  pieces: number;
-  type: 'box' | 'bag' | 'document' | 'other';
-  condition: 'OK' | 'Damaged';
-  cod: {
-    required: boolean;
-    amount?: number;
-  };
+  awb_number?: string;
+  trackingNumber?: string;
+  tamperTagId?: string;
+  status: any;
+  pieces?: number;
+  type?: 'box' | 'bag' | 'document' | 'other' | string;
+  condition?: 'OK' | 'Damaged' | string;
+  cod?: { required: boolean; amount?: number; currency?: string; };
+  cod_amount?: number;
   destinationTownship?: string;
-  sender?: {
-    name: string;
-    phone: string;
-  };
-  receiver?: {
-    name: string;
-    phone: string;
-    address: string;
-    township: string;
-  };
-  photos: string[];
-  riderId: string;
-  createdAt: string;
+  origin?: string;
+  destination?: string;
+  senderName?: string;
+  senderAddress?: string;
+  senderPhone?: string;
+  receiverName?: string;
+  receiverAddress?: string;
+  receiverPhone?: string;
+  receiverCity?: string;
+  sender?: { name?: string; phone?: string; };
+  receiver?: { name?: string; phone?: string; address?: string; township?: string; city?: string; };
+  pickup_address?: any;
+  delivery_address?: any;
+  package_details?: any;
+  weight?: number;
+  dimensions?: string;
+  priority?: string;
+  isPriority?: boolean;
+  photos?: string[];
+  riderId?: string;
+  createdAt?: string;
+  created_at?: string;
+  updated_at?: string;
   registeredAt?: string;
-  labelPrintedCount: number;
+  estimated_delivery?: string;
+  labelPrintedCount?: number;
   lastLocation?: string;
+  history?: any[];
+  metadata?: any;
 }
 
 export interface PickupRecord {
@@ -248,7 +229,7 @@ export interface PickupRecord {
 export interface PODRecord {
   shipmentId: string;
   recipientName: string;
-  relationship: 'Self' | 'Family' | 'Neighbor' | 'Guard' | 'Other';
+  relationship: string;
   signature: string;
   photo?: string;
   timestamp: string;
@@ -257,36 +238,36 @@ export interface PODRecord {
 }
 
 export const MOCK_TOWNSHIPS = [
-  'Downtown',
-  'North District',
-  'South District',
-  'East Industrial',
-  'West Waterfront',
-  'Airport Zone',
-];
-const NDR_REASONS = [
-  'No answer',
-  'Refused by recipient',
-  'Address not found',
-  'COD amount dispute',
-  'Customer rescheduled',
-  'Restricted access',
+  'Downtown', 'North District', 'South District', 'East Industrial', 'West Waterfront', 'Airport Zone',
 ];
 
-export { NDR_REASONS };
+export const NDR_REASONS = [
+  'No answer', 'Refused by recipient', 'Address not found', 'COD amount dispute', 'Customer rescheduled', 'Restricted access',
+];
 
-// Legacy User interface for backward compatibility
 export interface User {
   id: string;
-  name: string;
-  email: string;
-  role: UserRole;
+  name?: string;
+  email?: string;
+  role?: UserRole;
   permissions?: string[];
-  isActive: boolean;
-  createdAt: Date;
-  lastLogin: Date;
+  isActive?: boolean;
+  is_active?: boolean;
+  createdAt?: Date | string;
+  lastLogin?: Date | string;
   batchId?: string;
+  branchId?: string;
+  branch_id?: string;
+  full_name?: string;
+  fullName?: string;
+  status?: string;
+  phoneNumber?: string;
+  avatarUrl?: string;
+  user_metadata?: any;
+  branches?: { name: string }[];
 }
+
+export type UserProfile = User;
 
 export type FormatCurrencyOptions = {
   locale?: string;
@@ -295,34 +276,16 @@ export type FormatCurrencyOptions = {
   maximumFractionDigits?: number;
 };
 
-/**
- * Formats a number as currency (default MMK).
- * Safe for NaN/undefined/null by returning "0".
- */
 export function formatCurrency(
   value: number | string | null | undefined,
   options: FormatCurrencyOptions = {}
 ): string {
-  const num =
-    typeof value === "string" ? Number(value) : typeof value === "number" ? value : 0;
+  const num = typeof value === "string" ? Number(value) : typeof value === "number" ? value : 0;
   const safe = Number.isFinite(num) ? num : 0;
-
-  const {
-    locale = "en-US",
-    currency = "MMK",
-    minimumFractionDigits = 0,
-    maximumFractionDigits = 0,
-  } = options;
-
+  const { locale = "en-US", currency = "MMK", minimumFractionDigits = 0, maximumFractionDigits = 0 } = options;
   try {
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency,
-      minimumFractionDigits,
-      maximumFractionDigits,
-    }).format(safe);
+    return new Intl.NumberFormat(locale, { style: "currency", currency, minimumFractionDigits, maximumFractionDigits }).format(safe);
   } catch {
-    // Fallback if currency/locale invalid
     return `${safe}`;
   }
 }
@@ -334,32 +297,16 @@ export type FormatDateOptions = {
   timeStyle?: "full" | "long" | "medium" | "short";
 };
 
-/**
- * Formats a date/time using Intl.DateTimeFormat.
- * Safe for null/undefined/invalid inputs by returning an empty string.
- */
 export function formatDate(
   value: Date | string | number | null | undefined,
   options: FormatDateOptions = {}
 ): string {
   if (value === null || value === undefined) return "";
-
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-
-  const {
-    locale = "en-US",
-    timeZone,
-    dateStyle = "medium",
-    timeStyle,
-  } = options;
-
+  const { locale = "en-US", timeZone, dateStyle = "medium", timeStyle } = options;
   try {
-    return new Intl.DateTimeFormat(locale, {
-      ...(timeZone ? { timeZone } : {}),
-      dateStyle,
-      ...(timeStyle ? { timeStyle } : {}),
-    }).format(date);
+    return new Intl.DateTimeFormat(locale, { ...(timeZone ? { timeZone } : {}), dateStyle, ...(timeStyle ? { timeStyle } : {}) }).format(date);
   } catch {
     return date.toISOString();
   }

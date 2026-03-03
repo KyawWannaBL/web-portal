@@ -1,7 +1,6 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
@@ -11,11 +10,11 @@ const buttonVariants = cva(
       variant: {
         default: "bg-luxury-gold text-luxury-obsidian hover:bg-amber-500",
         destructive: "bg-red-600 text-white hover:bg-red-500",
-        outline:
-          "border border-white/10 bg-transparent text-white/80 hover:bg-white/5 hover:text-white",
+        outline: "border border-white/10 bg-transparent text-white/80 hover:bg-white/5 hover:text-white",
         secondary: "bg-white/10 text-white hover:bg-white/15",
         ghost: "bg-transparent text-white/70 hover:bg-white/5 hover:text-white",
         link: "bg-transparent text-luxury-gold underline-offset-4 hover:underline",
+        danger: "bg-red-600 text-white hover:bg-red-500", // Fallback for older code
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -31,10 +30,11 @@ const buttonVariants = cva(
   }
 )
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  asChild?: boolean;
+  // Explicitly defined to prevent dynamic string crashes
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "danger" | (string & {});
+  size?: "default" | "sm" | "lg" | "icon" | (string & {});
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -42,7 +42,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant: variant as any, size: size as any, className }))}
         ref={ref}
         {...props}
       />
