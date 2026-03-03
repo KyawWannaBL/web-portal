@@ -55,9 +55,11 @@ export default function App() {
                     <RequireRole
                       allow={[
                         "SYS",            // System Overlord clearance
-                        "APP_OWNER",      // MD primary clearance
+                        "APP_OWNER",      // Primary MD clearance
                         "SUPER_ADMIN",    // IT Admin primary clearance
-                        "SUPER_A",        // DEFENSIVE: Fixes truncation in btx_session
+                        "SUPER_A",        // DEFENSIVE: Handles truncation in btx_session
+                        "OPERATIONS_ADMIN",
+                        "FINANCE_ADMIN",
                         "MGR",
                       ]}
                     >
