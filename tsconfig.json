@@ -8,15 +8,13 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["vite/client", "node"],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "types": ["vite/client", "node"]
   },
   "include": [
     "src/main.tsx",
     "src/App.tsx",
+    "src/styles.css",
+    "src/lib/**/*",
     "src/routes/**/*",
     "src/state/**/*",
     "src/ui/**/*",

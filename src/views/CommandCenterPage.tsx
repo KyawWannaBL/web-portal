@@ -15,17 +15,14 @@ function ActionCard({ title, desc, to, cta }: { title: string; desc: string; to:
   );
 }
 
-// Define the exact shape of our stats so TypeScript doesn't force them into strings
-type StatsData = {
-  personnel: string | number;
-  activeRiders: string | number;
-  securityEvents: string | number;
-  rotationRequired: string | number;
-};
-
 export default function CommandCenterPage() {
   const { t } = useI18n();
-  const [stats, setStats] = React.useState<StatsData>({ personnel: "-", activeRiders: "-", securityEvents: "-", rotationRequired: "-" });
+  const [stats, setStats] = React.useState({ 
+    personnel: "-" as string | number, 
+    activeRiders: "-" as string | number, 
+    securityEvents: "-" as string | number, 
+    rotationRequired: "-" as string | number 
+  });
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -34,7 +31,7 @@ export default function CommandCenterPage() {
       try {
         await new Promise(resolve => setTimeout(resolve, 600));
         if (isMounted) {
-          setStats({ personnel: 142, activeRiders: 48, securityEvents: 0, rotationRequired: 3 });
+          setStats({ personnel: 1, activeRiders: 0, securityEvents: 0, rotationRequired: 0 });
         }
       } catch (err) {
         console.error("Failed to load dashboard stats", err);
@@ -42,7 +39,6 @@ export default function CommandCenterPage() {
         if (isMounted) setIsLoading(false);
       }
     }
-    
     fetchDashboardStats();
     return () => { isMounted = false; };
   }, []);

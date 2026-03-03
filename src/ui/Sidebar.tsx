@@ -27,12 +27,7 @@ export default function Sidebar() {
       </div>
       <nav className="nav">
         {NAV_ITEMS.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === PATHS.commandCenter}
-            className={({ isActive }) => cx("navItem", isActive && "navItemActive")}
-          >
+          <NavLink key={item.to} to={item.to} end={item.to === PATHS.commandCenter} className={({ isActive }) => cx("navItem", isActive && "navItemActive")}>
             <span className="navDot" aria-hidden="true" />
             <span>{t(item.key)}</span>
           </NavLink>

@@ -9,10 +9,7 @@ import { ChevronDown, UserIcon } from "./icons";
 
 function usePrevNext(pathname: string) {
   const idx = ROUTE_ORDER.findIndex((p) => p === (pathname as AppPath));
-  return { 
-    prev: idx > 0 ? ROUTE_ORDER[idx - 1] : null, 
-    next: idx >= 0 && idx < ROUTE_ORDER.length - 1 ? ROUTE_ORDER[idx + 1] : null 
-  };
+  return { prev: idx > 0 ? ROUTE_ORDER[idx - 1] : null, next: idx >= 0 && idx < ROUTE_ORDER.length - 1 ? ROUTE_ORDER[idx + 1] : null };
 }
 
 export default function TopBar() {
@@ -21,7 +18,6 @@ export default function TopBar() {
   const signOutAndGo = useSignOutAndRedirect();
   const location = useLocation();
   const navigate = useNavigate();
-
   const { prev, next } = usePrevNext(location.pathname);
   const meta = getMetaByPath(location.pathname);
   const pageTitle = meta?.titleKey ? t(meta.titleKey) : "";

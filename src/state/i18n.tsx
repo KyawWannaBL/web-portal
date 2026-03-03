@@ -38,18 +38,18 @@ const TRANSLATIONS: Record<Lang, Record<string, string>> = {
     brand: "BRITIUM", level: "L5", authorizedSession: "အတည်ပြုထားသော အသုံးပြုသူ • ဆက်ရှင် လှုပ်ရှားနေသည်",
     systemStatus: "စနစ် အခြေအနေ", allSystemsNominal: "● စနစ်အားလုံး ပုံမှန်",
     languageToggle: "EN / MY", previous: "ယခင်", next: "နောက်", signOut: "ထွက်ရန်",
-    account: "အကောင့်", accountMenu: "စနစ်လုပ်ငန်းစဉ်", viewProfile: "ပရိုဖိုင် ကြည့်ရန်",
-    manageAccount: "စနစ်အသုံးပြုသူများစီမံခန့်ခွဲမှု", executiveOverview: "လုပ်ငန်းစဉ်အကျဉ်းချုပ်",
+    account: "အကောင့်", accountMenu: "အကောင့် မီနူး", viewProfile: "ပရိုဖိုင် ကြည့်ရန်",
+    manageAccount: "အကောင့် စီမံရန်", executiveOverview: "အုပ်ချုပ်ရေး အနှစ်ချုပ်",
     commandCenter: "ဗဟိုထိန်းချုပ်မှု", accountApprovals: "အကောင့် အတည်ပြုမှုများ",
-    shipmentControl: "ပို့ဆောင်ရေးလုပ်ငန်းစဉ်ကြီးကြပ်မှု", fleetCommand: "ယာဉ် စီမံခန့်ခွဲမှု",
+    shipmentControl: "ပို့ဆောင်မှု ထိန်းချုပ်မှု", fleetCommand: "ယာဉ် စီမံခန့်ခွဲမှု",
     globalFinance: "ကမ္ဘာလုံးဆိုင်ရာ ငွေကြေး", liveTelemetry: "တိုက်ရိုက် တယ်လီမထရီ",
-    systemTariffs: "၀န်ဆောင်ခဆိုင်ရာ သတ်မှတ်ချက်များ", quickActions: "အမြန် လုပ်ဆောင်ချက်များ",
-    launchModule: "မော်ဂျူး ဖွင့်ရန်", liveAuditFeed: "တိုက်ရိုက် စစ်ဆေးမှုလမ်းကြောင်း",
+    systemTariffs: "စနစ် အခွန်အကောက်", quickActions: "အမြန် လုပ်ဆောင်ချက်များ",
+    launchModule: "မော်ဂျူး ဖွင့်ရန်", liveAuditFeed: "တိုက်ရိုက် စစ်ဆေးမှု စီးကြောင်း",
     noAuditEvents: "စစ်ဆေးမှု ဖြစ်ရပ် မတွေ့ပါ။", totalPersonnel: "စုစုပေါင်း ဝန်ထမ်း",
     activeRiders: "လှုပ်ရှားနေသူများ", securityEvents: "လုံခြုံရေး ဖြစ်ရပ်",
     rotationRequired: "လဲလှယ်ရန် လိုအပ်", accountControl: "အကောင့် ထိန်းချုပ်မှု",
     accountControlDesc: "အခွင့်အရေးများ၊ အခန်းကဏ္ဍများနှင့် စနစ်ဝင်ရောက်ခွင့်များကို စီမံရန်။",
-    hrPortal: "လူမှုရေး/ဝန်ထမ်း ပေါ်တယ်", hrPortalDesc: "ဝန်ထမ်းမှတ်တမ်းများ၊ တာဝန်ချိန်များနှင့် ဌာနအလိုက်တာဝန်ချထားမှုများကို စစ်ဆေးရန်။",
+    hrPortal: "လူမှုရေး/ဝန်ထမ်း ပေါ်တယ်", hrPortalDesc: "ဝန်ထမ်းမှတ်တမ်းများ၊ တာဝန်ချိန်များနှင့် ဌာနချထားမှုများကို စစ်ဆေးရန်။",
     notFound: "မတွေ့ပါ", routeMissing: "လမ်းကြောင်း မရှိ",
     backToCommandCenter: "ရုံးချုပ်သို့ ပြန်သွားရန်", loginTitle: "ဝင်ရောက်ရန်",
     loginDesc: "သင့်ကော်ပိုရိတ်အချက်အလက်များထည့်ပါ။", signIn: "ဝင်ရောက်ရန်",
@@ -70,9 +70,9 @@ export function I18nProvider(props: { children: React.ReactNode }) {
 
   const toggleLang = React.useCallback(() => {
     setLangState((prev) => {
-      const next = prev === "en" ? "my" : "en";
-      localStorage.setItem(STORAGE_KEY, next);
-      return next;
+        const next = prev === "en" ? "my" : "en";
+        localStorage.setItem(STORAGE_KEY, next);
+        return next;
     });
   }, []);
 
