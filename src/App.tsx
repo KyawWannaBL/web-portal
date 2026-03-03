@@ -21,7 +21,8 @@ import { RequireRole } from "@/routes/RequireRole";
 const Loading = () => {
   const { lang } = useLanguage();
   return (
-    <div className="min-h-screen bg-[#05080F] flex flex-center justify-center font-mono space-y-4">
+    <div className="min-h-screen bg-[#05080F] flex flex-col items-center justify-center font-mono space-y-4">
+      <div className="h-10 w-10 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
       <div className="text-[10px] text-emerald-500 tracking-widest uppercase animate-pulse">
         {lang === 'en' ? 'INITIALIZING L5 SECURE GATEWAY...' : 'L5 လုံခြုံရေးဂိတ်ကို စတင်နေပါသည်...'}
       </div>
@@ -35,17 +36,17 @@ export default function App() {
       <Suspense fallback={<Loading />}>
         <Router>
           <Routes>
-            {/* Public */}
+            {/* Public Entry Points */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
 
-            {/* Policy enforcement */}
+            {/* System Policy Enforcement */}
             <Route path="/security-update" element={<SecurityUpdate />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
-            {/* Protected */}
+            {/* Protected L5 Command Center */}
             <Route element={<RequireAuth />}>
               <Route element={<RequirePasswordRotation />}>
                 <Route
@@ -53,14 +54,10 @@ export default function App() {
                   element={
                     <RequireRole
                       allow={[
-                        "SYS",            // System Overlord Bypass
-                        "APP_OWNER",      // MD Bypass
-                        "SUPER_ADMIN",    // IT Admin Bypass
-                        "SUPER_A",        // Truncation Fallback
-                        "OPERATIONS_ADMIN",
-                        "FINANCE_ADMIN",
-                        "MARKETING_ADMIN",
-                        "CUSTOMER_SERVICE_ADMIN",
+                        "SYS",            // System Overlord clearance
+                        "APP_OWNER",      // MD primary clearance
+                        "SUPER_ADMIN",    // IT Admin primary clearance
+                        "SUPER_A",        // DEFENSIVE: Fixes truncation in btx_session
                         "MGR",
                       ]}
                     >
@@ -76,7 +73,7 @@ export default function App() {
               </Route>
             </Route>
 
-            {/* Defaults */}
+            {/* Routing Defaults */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
