@@ -18,25 +18,27 @@ export default function App() {
       <Suspense fallback={<Loading />}>
         <Router>
           <Routes>
-            {/* Public Routes */}
+            {/* Public Entry */}
             <Route path="/login" element={<Login />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
-            {/* Protected Admin Routes */}
+            {/* L5 Command Infrastructure */}
             <Route element={<RequireAuth />}>
               <Route path="/admin" element={
                 <RequireRole allow={["SYS", "APP_OWNER", "SUPER_ADMIN", "SUPER_A"]}>
                   <AdminLayout />
                 </RequireRole>
               }>
-                {/* These match the button paths in AdminLayout.tsx */}
+                {/* Fixed Index Redirect */}
                 <Route index element={<Navigate to="dashboard" replace />} />
+                
+                {/* Active Core Modules */}
                 <Route path="dashboard" element={<SuperAdminDashboard />} />
                 <Route path="approvals" element={<AccountControl />} />
                 <Route path="accounts" element={<AccountControl />} />
                 <Route path="hr" element={<HRPortal />} />
-                
-                {/* Fallbacks for menu buttons not yet built */}
+
+                {/* NEW: Mapped Side-Menu Routes to prevent Login Redirects */}
                 <Route path="shipments" element={<SuperAdminDashboard />} />
                 <Route path="fleet" element={<SuperAdminDashboard />} />
                 <Route path="omni-finance" element={<SuperAdminDashboard />} />
@@ -45,6 +47,7 @@ export default function App() {
               </Route>
             </Route>
 
+            {/* Global Fallback */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
