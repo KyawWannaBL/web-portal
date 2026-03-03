@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { ShieldCheck, Mail, Lock, Download, Globe, AlertTriangle, Loader2 } from 'lucide-react';
+import { ShieldCheck, Download, Globe, AlertTriangle, Loader2 } from 'lucide-react';
 import { supabase } from '@/supabaseClient';
 
 export default function Login() {
@@ -16,23 +16,31 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setAuthError(''); // Clear old errors
+    
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      if (error) throw error; // This catches the 400 error you are seeing
+      
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
+      
       let role = profile?.role || 'USER';
       if (role.startsWith('SUPER')) role = 'SUPER_ADMIN';
+      if (role.startsWith('APP')) role = 'APP_OWNER';
+      if (role.startsWith('SYS')) role = 'SYS';
+      
       localStorage.setItem('btx_session', JSON.stringify({ email: data.user.email, role }));
       navigate('/admin/dashboard');
     } catch (err: any) {
-      setAuthError(lang === 'en' ? 'Invalid Credentials' : 'အချက်အလက် မှားယွင်းနေပါသည်');
+      console.error("Auth Failed:", err);
+      // Now the UI will actually show this to you!
+      setAuthError(lang === 'en' ? 'Access Denied: Invalid Credentials' : 'ဝင်ရောက်ခွင့် ငြင်းပယ်ခံရသည်- အချက်အလက်မှားယွင်းနေသည်');
       setIsLoading(false);
     }
   };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-[#05080F] p-4 overflow-hidden">
-      {/* Background Video Restoration */}
       <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover opacity-20 grayscale">
         <source src="/background.mp4" type="video/mp4" />
       </video>
@@ -48,6 +56,15 @@ export default function Login() {
         </div>
 
         <div className="bg-[#111622]/90 backdrop-blur-xl rounded-3xl p-8 border-t-4 border-emerald-500 shadow-2xl">
+          
+          {/* RESTORED ERROR BANNER */}
+          {authError && (
+            <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-3 text-rose-400">
+              <AlertTriangle className="h-5 w-5 shrink-0" />
+              <p className="text-xs font-bold uppercase tracking-wide">{authError}</p>
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-4">
               <input type="email" required placeholder="admin@britium.com" className="w-full h-14 bg-[#0B0E17] border border-white/5 rounded-xl px-4 text-white outline-none focus:border-emerald-500" onChange={e => setEmail(e.target.value)} />
