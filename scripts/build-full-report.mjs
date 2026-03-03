@@ -18,17 +18,8 @@ function classifyModule(mod) {
 
 function parseMissingModules(log) {
   const missing = [];
-
-  // TS2307: Cannot find module '...'
-  for (const m of log.matchAll(/TS2307:\s+Cannot find module ['"]([^'"]+)['"]/g)) {
-    missing.push(m[1]);
-  }
-
-  // TS2688: Cannot find type definition file for '...'
-  for (const m of log.matchAll(/TS2688:\s+Cannot find type definition file for ['"]([^'"]+)['"]/g)) {
-    missing.push(`@types/${m[1]}`);
-  }
-
+  for (const m of log.matchAll(/TS2307:\s+Cannot find module ['"]([^'"]+)['"]/g)) missing.push(m[1]);
+  for (const m of log.matchAll(/TS2688:\s+Cannot find type definition file for ['"]([^'"]+)['"]/g)) missing.push(`@types/${m[1]}`);
   return missing;
 }
 
@@ -45,7 +36,6 @@ async function run() {
   child.stderr.on("data", (d) => (out += d.toString()));
 
   const exitCode = await new Promise((resolve) => child.on("close", resolve));
-
   fs.writeFileSync(RAW_LOG, out, "utf8");
 
   const missingAll = parseMissingModules(out);
@@ -56,15 +46,15 @@ async function run() {
     generatedAt: new Date().toISOString(),
     exitCode,
     missing: {
-      local: localMissing,
       external: externalMissing,
-      total: localMissing.length + externalMissing.length,
+      local: localMissing,
+      total: externalMissing.length + localMissing.length
     },
-    notes: {
+    outputs: {
       rawLog: path.relative(process.cwd(), RAW_LOG),
-      howToFix:
-        "Local modules (@/*, ./, ../) usually mean files are missing or path casing differs. External modules mean npm packages missing (npm i <pkg>).",
-    },
+      json: path.relative(process.cwd(), JSON_OUT),
+      txt: path.relative(process.cwd(), TXT_OUT)
+    }
   };
 
   fs.writeFileSync(JSON_OUT, JSON.stringify(result, null, 2) + "\n", "utf8");
@@ -78,14 +68,12 @@ async function run() {
     `Missing local modules (${localMissing.length}):`,
     ...localMissing.map((m) => `  - ${m}`),
     "",
-    `Raw log: ${path.relative(process.cwd(), RAW_LOG)}`,
-    `JSON report: ${path.relative(process.cwd(), JSON_OUT)}`,
+    `Raw log: ${result.outputs.rawLog}`,
+    `JSON report: ${result.outputs.json}`
   ];
-
   fs.writeFileSync(TXT_OUT, lines.join("\n") + "\n", "utf8");
 
-  console.log(`Wrote:\n- ${path.relative(process.cwd(), TXT_OUT)}\n- ${path.relative(process.cwd(), JSON_OUT)}\n`);
-
+  console.log(`Wrote reports:\n- ${result.outputs.txt}\n- ${result.outputs.json}\n- ${result.outputs.rawLog}\n`);
   process.exit(typeof exitCode === "number" ? exitCode : 1);
 }
 

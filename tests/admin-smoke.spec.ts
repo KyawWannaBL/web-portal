@@ -10,7 +10,7 @@ const ROUTES = [
   "/admin/settings",
 ];
 
-test("admin: login + Prev/Next full walk + sidebar sanity + signout", async ({ page }) => {
+test("admin: login + Prev/Next full walk + sidebar + signout", async ({ page }) => {
   await page.goto("/login");
 
   await page.getByTestId("login-email").fill("demo@britium.test");
@@ -19,7 +19,7 @@ test("admin: login + Prev/Next full walk + sidebar sanity + signout", async ({ p
 
   await expect(page).toHaveURL(ROUTES[0]);
 
-  // Forward: Next through all routes
+  // Forward walk
   await expect(page.getByTestId("btn-prev")).toBeDisabled();
   for (let i = 0; i < ROUTES.length - 1; i++) {
     await page.getByTestId("btn-next").click();
@@ -27,22 +27,20 @@ test("admin: login + Prev/Next full walk + sidebar sanity + signout", async ({ p
   }
   await expect(page.getByTestId("btn-next")).toBeDisabled();
 
-  // Backward: Prev to start
+  // Backward walk
   for (let i = ROUTES.length - 1; i > 0; i--) {
     await page.getByTestId("btn-prev").click();
     await expect(page).toHaveURL(ROUTES[i - 1]);
   }
   await expect(page.getByTestId("btn-prev")).toBeDisabled();
 
-  // Sidebar spot checks (ensures routing still works)
+  // Sidebar sanity
   await page.getByTestId("nav-shipments").click();
   await expect(page).toHaveURL("/admin/shipments");
-
   await page.getByTestId("nav-dashboard").click();
   await expect(page).toHaveURL("/admin/dashboard");
 
-  // Language toggle + account dropdown + signout
-  await page.getByTestId("btn-lang").click();
+  // Sign out from menu
   await page.getByTestId("btn-account").click();
   await page.getByTestId("menu-signout").click();
   await expect(page).toHaveURL(/\/login/);
