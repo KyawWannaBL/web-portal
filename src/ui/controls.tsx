@@ -11,7 +11,7 @@ type CommonProps = {
 };
 
 type LinkProps = CommonProps & {
-  to: To;
+  to: To;              // required
   disabled?: boolean;
   onClick?: never;
 };
