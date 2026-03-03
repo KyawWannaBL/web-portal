@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/supabaseClient";
 
 // Types for the enterprise logistics platform
 export interface User {
