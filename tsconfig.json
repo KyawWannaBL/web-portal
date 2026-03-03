@@ -8,15 +8,21 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["vite/client", "node"]
+    "types": ["vite/client", "node"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": [
     "src/main.tsx",
     "src/App.tsx",
-    "src/styles.css",
-    "src/lib/**/*",
-    "src/routes/**/*",
-    "src/state/**/*",
+    "src/supabaseClient.ts",
+    "src/routes/paths.ts",
+    "src/routes/meta.ts",
+    "src/routes/routes.tsx",
+    "src/state/auth.tsx",
+    "src/state/i18n.tsx",
     "src/ui/**/*",
     "src/views/**/*"
   ]

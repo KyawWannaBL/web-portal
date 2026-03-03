@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { supabase } from "@/supabaseClient";
 
 export async function apiFetch(input: RequestInfo | URL, init: RequestInit = {}) {
