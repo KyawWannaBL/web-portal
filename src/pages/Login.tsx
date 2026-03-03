@@ -65,7 +65,7 @@ export default function Login() {
              </button>
              <div className="flex justify-between px-2">
                 <Link to="/signup" className="text-[10px] text-slate-500 hover:text-emerald-500 uppercase font-mono">Sign Up</Link>
-                <Link to="/forgot-password" element={<ForgotPassword />} className="text-[10px] text-slate-500 hover:text-emerald-500 uppercase font-mono">Forgot Password?</Link>
+                <Link to="/forgot-password"  className="text-[10px] text-slate-500 hover:text-emerald-500 uppercase font-mono">Forgot Password?</Link>
              </div>
              <button onClick={toggleLang} className="text-slate-500 hover:text-white flex items-center gap-2 text-[10px] mx-auto uppercase font-mono">
                 <Globe size={12} /> {lang === 'en' ? 'မြန်မာစာ' : 'English'}
