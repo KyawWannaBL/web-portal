@@ -1,45 +1,52 @@
 import * as React from "react";
 import { Link, type To } from "react-router-dom";
 
-export function cx(...parts: Array<string | false | undefined>) {
+export function cx(...parts: Array<string | false | undefined | null>) {
   return parts.filter(Boolean).join(" ");
 }
 
-type BtnBase = {
+type CommonProps = {
   className?: string;
   children: React.ReactNode;
+};
+
+type LinkProps = CommonProps & {
+  to: To; // must be defined
+  onClick?: never;
   disabled?: boolean;
 };
 
-type BtnLink = BtnBase & { to: To; onClick?: never };
-type BtnButton = BtnBase & { to?: never; onClick: React.MouseEventHandler<HTMLButtonElement> };
+type ButtonProps = CommonProps & {
+  to?: never;
+  onClick: React.MouseEventHandler<HTMLButtonElement>;
+  disabled?: boolean;
+};
 
-export function AppButton(props: BtnLink | BtnButton) {
+export function AppButton(props: LinkProps | ButtonProps) {
   if ("to" in props) {
-    const disabled = !!props.disabled;
+    const { to, className, children, disabled } = props;
     return (
       <Link
-        className={cx("btn", props.className, disabled && "btnDisabled")}
-        to={props.to}
+        to={to}
+        className={cx("btn", className, disabled && "btnDisabled")}
         aria-disabled={disabled ? "true" : "false"}
-        tabIndex={disabled ? -1 : undefined}
         onClick={(e) => {
           if (disabled) e.preventDefault();
         }}
       >
-        {props.children}
+        {children}
       </Link>
     );
   }
 
+  const { onClick, className, children, disabled } = props;
   return (
-    <button
-      type="button"
-      className={cx("btn", props.className, props.disabled && "btnDisabled")}
-      onClick={props.onClick}
-      disabled={props.disabled}
-    >
-      {props.children}
+    <button type="button" className={cx("btn", className)} onClick={onClick} disabled={disabled}>
+      {children}
     </button>
   );
+}
+
+export function IconPill(props: { children: React.ReactNode; className?: string }) {
+  return <span className={cx("pill", props.className)}>{props.children}</span>;
 }
