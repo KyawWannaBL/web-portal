@@ -10,16 +10,11 @@
     "noEmit": true,
     "types": ["vite/client", "node"],
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "paths": { "@/*": ["src/*"] }
   },
   "include": [
     "src/main.tsx",
     "src/App.tsx",
-    "src/supabaseClient.ts",
-    "src/routes/paths.ts",
-    "src/routes/meta.ts",
     "src/routes/routes.tsx",
     "src/state/auth.tsx",
     "src/state/i18n.tsx",
