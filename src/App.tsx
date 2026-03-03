@@ -3,8 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { LanguageProvider } from "./contexts/LanguageContext";
 import AdminLayout from "./components/AdminLayout";
 import Login from "./pages/Login";
-import SignUp from "./pages/SignUp";
-import ForgotPassword from "./pages/ForgotPassword";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import AccountControl from "./pages/AccountControl";
 import HRPortal from "./pages/HRPortal";
@@ -20,24 +18,30 @@ export default function App() {
       <Suspense fallback={<Loading />}>
         <Router>
           <Routes>
-            {/* Public Gates */}
+            {/* Public Routes */}
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
-            {/* Protected L5 Command Center */}
+            {/* Protected Admin Routes */}
             <Route element={<RequireAuth />}>
               <Route path="/admin" element={
                 <RequireRole allow={["SYS", "APP_OWNER", "SUPER_ADMIN", "SUPER_A"]}>
                   <AdminLayout />
                 </RequireRole>
               }>
+                {/* These match the button paths in AdminLayout.tsx */}
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<SuperAdminDashboard />} />
-                <Route path="accounts" element={<AccountControl />} />
                 <Route path="approvals" element={<AccountControl />} />
+                <Route path="accounts" element={<AccountControl />} />
                 <Route path="hr" element={<HRPortal />} />
+                
+                {/* Fallbacks for menu buttons not yet built */}
+                <Route path="shipments" element={<SuperAdminDashboard />} />
+                <Route path="fleet" element={<SuperAdminDashboard />} />
+                <Route path="omni-finance" element={<SuperAdminDashboard />} />
+                <Route path="live-map" element={<SuperAdminDashboard />} />
+                <Route path="settings" element={<SuperAdminDashboard />} />
               </Route>
             </Route>
 
