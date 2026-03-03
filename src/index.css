@@ -1,42 +1,41 @@
-@import "tailwindcss";
-
-@theme {
-  --color-luxury-gold: #D4AF37;
-  --color-luxury-obsidian: #0B0C10;
-  --color-luxury-cream: #FAF9F6;
-  
-  --color-primary: var(--color-luxury-gold);
-  --color-background: var(--color-luxury-obsidian);
-  --color-foreground: var(--color-luxury-cream);
-  --color-card: #0F1115;
-  --color-border: rgba(255, 255, 255, 0.1);
-  
-  --shadow-luxury: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
-  --radius-luxury: 2rem;
+:root {
+  --bg: #070b12;
+  --text: #FAF9F6;
+  --gold: #D4AF37;
+  --border: rgba(255, 255, 255, 0.1);
 }
 
-@layer base {
-  body {
-    background-color: var(--color-luxury-obsidian);
-    color: var(--color-luxury-cream);
-    @apply antialiased selection:bg-luxury-gold/30;
-  }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-@layer components {
-  .luxury-glass {
-    background: color-mix(in srgb, white 3%, transparent);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid color-mix(in srgb, white 10%, transparent);
-  }
-  .luxury-button {
-    background-color: var(--color-luxury-gold);
-    color: #000;
-    @apply font-bold tracking-[0.3em] uppercase text-[10px] py-4 px-10 rounded-full transition-all;
-  }
+.login-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: radial-gradient(circle at center, #0f1a31 0%, #070b12 100%);
 }
 
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--color-luxury-obsidian); }
-::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+.login-card {
+  padding: 40px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+.btn-gold {
+  background: var(--gold);
+  color: black;
+  padding: 12px 30px;
+  border-radius: 50px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
