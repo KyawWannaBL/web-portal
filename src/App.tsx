@@ -1,9 +1,8 @@
 import React, { Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { LanguageProvider } from "./contexts/LanguageContext";
+import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
 
 import AdminLayout from "./components/AdminLayout";
-
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -19,11 +18,16 @@ import { RequireAuth } from "@/routes/RequireAuth";
 import { RequirePasswordRotation } from "@/routes/RequirePasswordRotation";
 import { RequireRole } from "@/routes/RequireRole";
 
-const Loading = () => (
-  <div className="min-h-screen bg-[#05080F] flex items-center justify-center text-[10px] text-emerald-500 font-mono tracking-widest uppercase animate-pulse">
-    INITIALIZING L5 SECURE GATEWAY...
-  </div>
-);
+const Loading = () => {
+  const { lang } = useLanguage();
+  return (
+    <div className="min-h-screen bg-[#05080F] flex flex-center justify-center font-mono space-y-4">
+      <div className="text-[10px] text-emerald-500 tracking-widest uppercase animate-pulse">
+        {lang === 'en' ? 'INITIALIZING L5 SECURE GATEWAY...' : 'L5 လုံခြုံရေးဂိတ်ကို စတင်နေပါသည်...'}
+      </div>
+    </div>
+  );
+};
 
 export default function App() {
   return (
@@ -35,8 +39,6 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-
-            {/* SSO callback */}
             <Route path="/auth/callback" element={<AuthCallback />} />
 
             {/* Policy enforcement */}
@@ -51,7 +53,10 @@ export default function App() {
                   element={
                     <RequireRole
                       allow={[
-                        "SUPER_ADMIN",
+                        "SYS",            // System Overlord Bypass
+                        "APP_OWNER",      // MD Bypass
+                        "SUPER_ADMIN",    // IT Admin Bypass
+                        "SUPER_A",        // Truncation Fallback
                         "OPERATIONS_ADMIN",
                         "FINANCE_ADMIN",
                         "MARKETING_ADMIN",
