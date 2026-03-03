@@ -29,16 +29,15 @@ export default function App() {
                   <AdminLayout />
                 </RequireRole>
               }>
-                {/* Fixed Index Redirect */}
                 <Route index element={<Navigate to="dashboard" replace />} />
                 
-                {/* Active Core Modules */}
+                {/* Core Administrative Modules */}
                 <Route path="dashboard" element={<SuperAdminDashboard />} />
                 <Route path="approvals" element={<AccountControl />} />
                 <Route path="accounts" element={<AccountControl />} />
                 <Route path="hr" element={<HRPortal />} />
 
-                {/* NEW: Mapped Side-Menu Routes to prevent Login Redirects */}
+                {/* Sidebar Mappings to prevent Redirect loops */}
                 <Route path="shipments" element={<SuperAdminDashboard />} />
                 <Route path="fleet" element={<SuperAdminDashboard />} />
                 <Route path="omni-finance" element={<SuperAdminDashboard />} />
@@ -47,7 +46,7 @@ export default function App() {
               </Route>
             </Route>
 
-            {/* Global Fallback */}
+            {/* Global Fallback Protection */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
