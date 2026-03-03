@@ -1,23 +1,42 @@
 @import "tailwindcss";
 
+@theme {
+  --color-luxury-gold: #D4AF37;
+  --color-luxury-obsidian: #0B0C10;
+  --color-luxury-cream: #FAF9F6;
+  
+  --color-primary: var(--color-luxury-gold);
+  --color-background: var(--color-luxury-obsidian);
+  --color-foreground: var(--color-luxury-cream);
+  --color-card: #0F1115;
+  --color-border: rgba(255, 255, 255, 0.1);
+  
+  --shadow-luxury: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+  --radius-luxury: 2rem;
+}
+
 @layer base {
   body {
-    @apply bg-[#0B101B] text-slate-300 antialiased selection:bg-emerald-500/30 selection:text-emerald-200;
+    background-color: var(--color-luxury-obsidian);
+    color: var(--color-luxury-cream);
+    @apply antialiased selection:bg-luxury-gold/30;
   }
 }
 
-/* Custom Scrollbar for Enterprise Feel */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+@layer components {
+  .luxury-glass {
+    background: color-mix(in srgb, white 3%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid color-mix(in srgb, white 10%, transparent);
+  }
+  .luxury-button {
+    background-color: var(--color-luxury-gold);
+    color: #000;
+    @apply font-bold tracking-[0.3em] uppercase text-[10px] py-4 px-10 rounded-full transition-all;
+  }
 }
-::-webkit-scrollbar-track {
-  background: #05080F; 
-}
-::-webkit-scrollbar-thumb {
-  background: #1e293b; 
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #334155; 
-}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--color-luxury-obsidian); }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
