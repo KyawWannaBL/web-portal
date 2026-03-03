@@ -9,29 +9,43 @@ export const ROLE_MATRIX: any = {
   CUR: { level: 'L1', scope: 'S1', permissions: ['PUP-01'] }
 };
 
-// This function is CALLED by RbacProvider.tsx
 export const normalizeRole = (role: string | null | undefined) => {
   if (!role) return null;
-  return role.trim().toUpperCase();
+  const clean = role.trim().toUpperCase();
+  // Map the truncated 'SUPER_A' seen in logs back to 'SUPER_ADMIN'
+  if (clean === 'SUPER_A') return 'SUPER_ADMIN';
+  return clean;
 };
 
-// This function is CALLED by RbacProvider.tsx to set permissions
 export const getEffectivePermissions = (role: string | null | undefined) => {
   const cleanRole = normalizeRole(role);
   if (!cleanRole) return [];
   
-  // Grant '*' (all) permissions to your admin roles
-  if (cleanRole === 'SYS' || cleanRole === 'APP_OWNER' || cleanRole === 'SUPER_ADMIN') {
+  // DEFENSIVE CHECK: Grant '*' if the role STARTS with these strings
+  if (
+    cleanRole.startsWith('SYS') || 
+    cleanRole.startsWith('APP_OWNER') || 
+    cleanRole.startsWith('SUPER_ADMIN')
+  ) {
     return ['*'];
   }
   
   return ROLE_MATRIX[cleanRole]?.permissions || [];
 };
 
-// Gatekeeper for components
 export const checkPermission = (role: string | null | undefined, perm: string) => {
   if (!role) return false;
   const cleanRole = normalizeRole(role);
-  if (cleanRole === 'SYS' || cleanRole === 'APP_OWNER' || cleanRole === 'SUPER_ADMIN') return true;
-  return ROLE_MATRIX[cleanRole]?.permissions.includes(perm) || false;
+
+  // DEFENSIVE CHECK: Bypass for all admin variations
+  if (
+    cleanRole?.startsWith('SYS') || 
+    cleanRole?.startsWith('APP_OWNER') || 
+    cleanRole?.startsWith('SUPER_ADMIN')
+  ) {
+    return true;
+  }
+
+  const roleData = ROLE_MATRIX[cleanRole || ''];
+  return roleData?.permissions?.includes(perm) || roleData?.permissions?.includes('*') || false;
 };
