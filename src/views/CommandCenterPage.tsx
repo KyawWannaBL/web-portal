@@ -17,19 +17,14 @@ function ActionCard({ title, desc, to, cta }: { title: string; desc: string; to:
 
 export default function CommandCenterPage() {
   const { t } = useI18n();
-  const [stats, setStats] = React.useState({ personnel: "-", activeRiders: "-", securityEvents: "-", rotationRequired: "-" });
+  const [stats, setStats] = React.useState({ personnel: "-" as string | number, activeRiders: "-" as string | number, securityEvents: "-" as string | number, rotationRequired: "-" as string | number });
   const [isLoading, setIsLoading] = React.useState(true);
 
-  // Production pattern: Fetch stats on mount
   React.useEffect(() => {
     let isMounted = true;
     async function fetchDashboardStats() {
       try {
-        // Placeholder for real API fetch
-        // const res = await fetch('/api/dashboard/stats');
-        // const data = await res.json();
         await new Promise(resolve => setTimeout(resolve, 600));
-        
         if (isMounted) {
           setStats({ personnel: 142, activeRiders: 48, securityEvents: 0, rotationRequired: 3 });
         }

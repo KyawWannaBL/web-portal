@@ -69,8 +69,8 @@ export function I18nProvider(props: { children: React.ReactNode }) {
   }, []);
 
   const toggleLang = React.useCallback(() => {
-    setLang((prev) => (prev === "en" ? "my" : "en"));
-  }, []);
+    setLang(lang === "en" ? "my" : "en");
+  }, [lang, setLang]);
 
   const t = React.useCallback(
     (key: string) => TRANSLATIONS[lang][key] ?? TRANSLATIONS.en[key] ?? key,
