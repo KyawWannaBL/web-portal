@@ -6,7 +6,7 @@ import { RequireAuth } from "../state/auth";
 import LoginPage from "../views/LoginPage";
 import NotFoundPage from "../views/NotFoundPage";
 
-// Lazy load the REAL UI components you uploaded
+// Lazy load the REAL UI components you built
 const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
 const AccountControl = lazy(() => import("@/pages/AccountControl"));
 const AccountingHome = lazy(() => import("@/pages/AccountingHome"));
@@ -14,10 +14,8 @@ const WayManagement = lazy(() => import("@/pages/WayManagement"));
 
 // Sleek loading screen for heavy components
 const Loading = () => (
-  <div className="flex h-full w-full items-center justify-center p-20">
-    <div className="text-sky-500 font-mono text-sm tracking-widest animate-pulse">
-      [ INITIALIZING L5 SECURE MODULE... ]
-    </div>
+  <div style={{ display: 'flex', height: '100%', minHeight: '50vh', width: '100%', alignItems: 'center', justifyContent: 'center', color: '#0ea5e9', fontFamily: 'monospace', letterSpacing: '0.1em' }}>
+    [ INITIALIZING SECURE MODULE... ]
   </div>
 );
 
@@ -32,10 +30,10 @@ export const routes: RouteObject[] = [
     ),
     children: [
       { index: true, element: <Suspense fallback={<Loading />}><AdminDashboard /></Suspense> },
-      { path: PATHS.accountControl.slice(1), element: <Suspense fallback={<Loading />}><AccountControl /></Suspense> },
-      { path: PATHS.accountApprovals.slice(1), element: <Suspense fallback={<Loading />}><AccountControl /></Suspense> },
-      { path: PATHS.globalFinance.slice(1), element: <Suspense fallback={<Loading />}><AccountingHome /></Suspense> },
-      { path: PATHS.shipmentControl.slice(1), element: <Suspense fallback={<Loading />}><WayManagement /></Suspense> },
+      { path: "account-control", element: <Suspense fallback={<Loading />}><AccountControl /></Suspense> },
+      { path: "account-approvals", element: <Suspense fallback={<Loading />}><AccountControl /></Suspense> },
+      { path: "global-finance", element: <Suspense fallback={<Loading />}><AccountingHome /></Suspense> },
+      { path: "shipment-control", element: <Suspense fallback={<Loading />}><WayManagement /></Suspense> },
       // Catch-all fallback
       { path: "*", element: <NotFoundPage /> }
     ]
