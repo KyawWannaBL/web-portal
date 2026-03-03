@@ -15,10 +15,11 @@
   "include": [
     "src/main.tsx",
     "src/App.tsx",
-    "src/routes/routes.tsx",
-    "src/state/auth.tsx",
-    "src/state/i18n.tsx",
+    "src/supabaseClient.ts",
+    "src/routes/**/*",
+    "src/state/**/*",
     "src/ui/**/*",
-    "src/views/**/*"
+    "src/views/**/*",
+    "src/lib/**/*"
   ]
 }
