@@ -1,19 +1,26 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
 import App from "./App";
-import "./styles.css";
-import { I18nProvider } from "./state/i18n";
-import { AuthProvider } from "./state/auth";
+import "./index.css";
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import ConfigFault from "@/components/ConfigFault";
+import { validateEnv } from "@/lib/env";
+
+const env = validateEnv();
+const root = document.getElementById("root")!;
+
+ReactDOM.createRoot(root).render(
   <React.StrictMode>
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <I18nProvider>
+    <ErrorBoundary>
+      {env.ok ? (
         <AuthProvider>
           <App />
         </AuthProvider>
-      </I18nProvider>
-    </BrowserRouter>
+      ) : (
+        <ConfigFault missing={env.missing} />
+      )}
+    </ErrorBoundary>
   </React.StrictMode>
 );

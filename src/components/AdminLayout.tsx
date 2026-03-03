@@ -50,7 +50,6 @@ export default function AdminLayout() {
 
   return (
     <div className="flex h-screen bg-[#0B101B] overflow-hidden font-sans text-slate-300">
-      {/* SIDEBAR */}
       <aside className="w-80 bg-[#05080F]/80 backdrop-blur-xl border-r border-white/5 flex flex-col p-8 z-20">
         <div className="mb-12 flex items-center gap-3">
           <div className="h-10 w-10 bg-emerald-500 rounded-xl flex items-center justify-center"><ShieldCheck className="text-white" /></div>
@@ -65,14 +64,11 @@ export default function AdminLayout() {
         </nav>
       </aside>
 
-      {/* MAIN CONTENT */}
       <main className="flex-1 flex flex-col relative overflow-hidden">
-        {/* ENHANCED TOPBAR */}
         <header className="h-20 bg-[#05080F]/50 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-10 z-10">
           <div className="min-w-0">
             <div className="text-[10px] font-mono tracking-widest text-slate-500 uppercase">
               {t("AUTHORIZED USER • SESSION ACTIVE", "အတည်ပြုထားသော အသုံးပြုသူ • ဆက်ရှင် လှုပ်ရှားနေသည်")}
-              {isMock ? `  •  ${t("MOCK MODE", "MOCK မုဒ်")}` : ""}
             </div>
             <div className="mt-1 text-white font-black tracking-[0.22em] text-sm sm:text-base truncate">{currentTitle}</div>
           </div>
@@ -88,7 +84,6 @@ export default function AdminLayout() {
               <Globe className="h-4 w-4 text-emerald-500" /> {lang === "en" ? "EN / MY" : "မြန်မာ / EN"}
             </button>
 
-            {/* ACCOUNT DROPDOWN */}
             <div className="relative" ref={accountRef}>
               <button onClick={() => setAccountOpen(!accountOpen)} className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-white transition-all">
                 <UserCircle2 className="h-4 w-4 text-emerald-500" />
